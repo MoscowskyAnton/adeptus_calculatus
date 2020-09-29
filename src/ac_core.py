@@ -2,7 +2,6 @@
 # coding: utf-8
 
 import numpy as np
-import matplotlib.pyplot as plt
 
 
 #  dice rolls
@@ -15,7 +14,8 @@ def d6rr( value_to_rr = 1):
         roll = d6()
     return roll
 
-
+def d3():
+    return np.random.randint(1,4)
 
 
 if __name__ == '__main__' :
