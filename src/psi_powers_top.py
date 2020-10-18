@@ -44,7 +44,8 @@ SW, Jaws, wc7, 2d6 - Move = mortals
 +Eld, Mind War, wc7, d6+LD - d6_Ld = mortals
 +Eld, Executioner, wc7, d3, if model slain + d3
 
-Harl, wc7, d3
+Harl, Mirror of Minds, wc7, bith roll d6, if >= mortal, repeat until < or destroyed
+Harl, Shards of lights wc7, d3
 
 +Innary, Gaze of Ynnead, wc6, d6: 1- mortal, 2-5 - d3, 6 - d6
 
