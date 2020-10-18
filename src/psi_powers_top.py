@@ -44,13 +44,13 @@ SW, Jaws, wc7, 2d6 - Move = mortals
 +Eld, Mind War, wc7, d6+LD - d6_Ld = mortals
 +Eld, Executioner, wc7, d3, if model slain + d3
 
-Harl, Mirror of Minds, wc7, bith roll d6, if >= mortal, repeat until < or destroyed
-Harl, Shards of lights wc7, d3
++Harl, Mirror of Minds, wc7, bith roll d6, if >= mortal, repeat until < or destroyed
++Harl, Shards of lights wc7, d3
 
 +Innary, Gaze of Ynnead, wc6, d6: 1- mortal, 2-5 - d3, 6 - d6
 
 +Gen, Psionic Blast, wc5, 2d6 < Ld - 1 mortal, >= LD - d3
-Gen, Mental Onslaught, wc6, d6+Ld > d6+Ld - mortal, repeat until 6 or =<
++Gen, Mental Onslaught, wc6, d6+Ld > d6+Ld - mortal, repeat until 6 or =<
 '''
 
 import numpy as np
@@ -224,6 +224,28 @@ class Inner_fire(Psychic_power):
                 if ac_core.d6() > 2:
                     d+=1
         return d
+
+class Mirror_of_minds(Psychic_power):
+    def __init__(self):
+        Psychic_power.__init__(self, 'Mirror of minds', 7)
+        
+    def get_damage(self, wc = None, ld = None, m = None, w = None, t = None):        
+        pt1, pt2 = self.cast(wc)
+        d = 0
+        if pt1:
+            while True:
+                r1 = ac_core.d6()
+                r2 = ac_core.d6()
+                if r1 >= r2:
+                    d+=1
+                else:
+                    break
+        return d
+    
+class Shards_of_lights(JustD3):
+    def __init__(self):
+        JustD3.__init__(self, 'Shards of lights', 7)
+                
 
 #
 # POWERS DEPENDED ON MODEL WOUND CHARACTERISTIC
@@ -476,6 +498,29 @@ class Psionic_blast(Psychic_power):
                 d = ac_core.d3()
         return d
         
+class Mental_onslaught(Psychic_power):
+    def __init__(self):
+        Psychic_power.__init__(self, '*Mental onslaught', 6)
+        
+    def get_damage(self, wc = None, ld = None, m = None, w = None, t = None):        
+        if ld is None:
+            print("Error! Provide Ld for {} power!".format(self.name))
+        pt1, pt2 = self.cast(wc)
+        d = 0
+        if pt1:
+            while True:
+                r1 = ac_core.d6() + 9
+                r2 = ac_core.d6()
+                if r2 == 6:
+                    break
+                r2 += ld
+                if r1 > r2:
+                    d+=1
+                else:
+                    break
+        return d
+                
+        
 if __name__ == '__main__' :
     
     all_powers = {}
@@ -484,16 +529,11 @@ if __name__ == '__main__' :
         (d, l) = results        
         all_powers[l] = d
     
-    ld_powers = {}
-    lds = [5,6,7,8,9,10]
-    def add_ld_power( results ):
-        (d, l) = results
-        ld_powers[l] = d
-    
     smite = Smite()    
     add_power( smite.test_power() )
     add_power( smite.test_power(wc = 6) )
     add_power( smite.test_power(wc = 7) )
+    
     infernal_gaze = Infernal_gaze()
     add_power( infernal_gaze.test_power() )
     
@@ -530,100 +570,172 @@ if __name__ == '__main__' :
     add_power( e.test_power(w = 3) )
     add_power( e.test_power(w = 4) )
     
+    sof = Shards_of_lights()
+    add_power( sof.test_power() )
+    
+    mom = Mirror_of_minds()
+    add_power( mom.test_power() )
+    
+    # models
+    
+    m_powers = {}
+    ms = [3,4,5,6,7,8,9,10,11,12,13,14,15]
+    def add_m_power( power ):
+        m_powers[power.name] = []
+        for m in ms:
+            data, _ = power.test_power(m = m)
+            m_powers[power.name].append(np.mean(data))
+    
     pw = Plague_wind()
     add_power( pw.test_power(m = 5) )
     add_power( pw.test_power(m = 10) )
+    add_m_power(pw)
     
     dk = Da_krunch()
     add_power( dk.test_power(m = 5) )
     add_power( dk.test_power(m = 10) )
+    add_m_power(dk)
     
     soc = Stream_of_corruption()
     add_power( soc.test_power(m = 5) )
     add_power( soc.test_power(m = 10) )
+    add_m_power(soc)    
+    
+    # toughnes
+    t_powers = {}
+    ts = [3,4,5,6,7,8]
+    def add_t_power( power ):
+        t_powers[power.name] = []
+        for t in ts:
+            data, _ = power.test_power(t = t)
+            t_powers[power.name].append(np.mean(data))
     
     cotl = Curse_of_the_Leper()
     add_power( cotl.test_power(t = 3) )
     add_power( cotl.test_power(t = 4) )
+    add_t_power( cotl )
     
     goc = Gift_of_Chaos()
     add_power( goc.test_power(t = 3) )
     add_power( goc.test_power(t = 4) )
+    add_t_power( goc )
     
     bb = Bloodboil()
     add_power( bb.test_power(t = 3) )
     add_power( bb.test_power(t = 4) )
+    add_t_power( bb )
     
     # LD
+    
+    ld_powers = {}
+    lds = [5,6,7,8,9,10]
+    def add_ld_power( power ):        
+        ld_powers[power.name] = []
+        for ld in lds:
+            data, _ = power.test_power(ld = ld)
+            ld_powers[power.name].append(np.mean(data))
+            
+    
     ps = Purge_soul()
-    add_power( ps.test_power(ld = 6) )
-    add_power( ps.test_power(ld = 9) )
-    for ld in lds:
-        add_ld_power( ps.test_power(ld = ld))
+    add_power( ps.test_power(ld = 7) )
+    add_power( ps.test_power(ld = 9) )        
+    add_ld_power( ps )
     
     mw = Mind_war()
-    add_power( mw.test_power(ld = 6) )
+    add_power( mw.test_power(ld = 7) )
     add_power( mw.test_power(ld = 9) )
-    for ld in lds:
-        add_ld_power( mw.test_power(ld = ld))
+    add_ld_power( mw )
     
     cc = Cacophonic_choir()
-    add_power( cc.test_power(ld = 6) )
+    add_power( cc.test_power(ld = 7) )
     add_power( cc.test_power(ld = 9) )
-    for ld in lds:
-        add_ld_power( cc.test_power(ld = ld))
+    add_ld_power( cc )
     
     t = Trephination()
-    add_power( t.test_power(ld = 6) )
+    add_power( t.test_power(ld = 7) )
     add_power( t.test_power(ld = 9) )
-    for ld in lds:
-        add_ld_power( t.test_power(ld = ld))
+    add_ld_power( t )
     
     c = Castigation()
-    add_power( c.test_power(ld = 6) )
+    add_power( c.test_power(ld = 7) )
     add_power( c.test_power(ld = 9) )
-    for ld in lds:
-        add_ld_power( c.test_power(ld = ld))
+    add_ld_power( c )
     
     ps_ = Psychic_scourge()
-    add_power( ps_.test_power(ld = 6) )
+    add_power( ps_.test_power(ld = 7) )
     add_power( ps_.test_power(ld = 9) )
-    for ld in lds:
-        add_ld_power( ps_.test_power(ld = ld))
+    add_ld_power( ps_ )
     
     pb = Psionic_blast()
-    add_power( pb.test_power(ld = 6) )
+    add_power( pb.test_power(ld = 7) )
     add_power( pb.test_power(ld = 9) )
-    for ld in lds:
-        add_ld_power( pb.test_power(ld = ld))
+    add_ld_power( pb )
         
+    mo = Mental_onslaught()
+    add_power( mo.test_power(ld = 7) )
+    add_power( mo.test_power(ld = 9) )
+    add_ld_power( mo )
     
     # all
     fig1, ax1 = plt.subplots()    
     all_powers = {k: v for k, v in sorted(all_powers.items(), key=lambda item: np.mean(item[1]))}    
-    ac_core.boxplot(list(all_powers.values()), ax1, list(all_powers.keys()), rotation = 90)
+    #ac_core.boxplot(list(all_powers.values()), ax1, list(all_powers.keys()), rotation = 90)
+    ac_core.boxplot([all_powers['Tzeench firestorm']], ax1, ['Tzeench firestorm'], rotation = 90)
     plt.title('Psychic powers top')    
     plt.ylabel("Mortal  wounds inflicted")
-    plt.xlabel("Powers")
+    plt.xlabel("Powers")    
     fig1.autofmt_xdate()
     plt.grid()
     plt.show()
     
     # ld
     fig1, ax1 = plt.subplots()    
-    for i in range(7):
-        list(ld_powers.values())[i*len(lds):(i+1)*len(lds)]
-        plt.plot(lds, , label=list(ld_powers.keys())[0][0:-4] )
+    for power_name, data in ld_powers.items():
+        plt.plot(lds, data, ".-", label = power_name)
+    plt.ylabel("Mortal  wounds inflicted")
+    plt.xlabel("Target leadership")
+    plt.title("Psipowers depending on leadership")
     plt.grid()
+    plt.legend()
     plt.show()
     
+    # m
     fig1, ax1 = plt.subplots()    
-    ld_powers = {k: v for k, v in sorted(ld_powers.items(), key=lambda item: np.mean(item[1]))}    
-    ac_core.boxplot(list(ld_powers.values()), ax1, list(ld_powers.keys()), rotation = 90)
-    plt.title('Psychic powers (leadership) top')    
+    for power_name, data in m_powers.items():
+        plt.plot(ms, data, ".-", label = power_name)
     plt.ylabel("Mortal  wounds inflicted")
-    plt.xlabel("Powers")
-    fig1.autofmt_xdate()
+    plt.xlabel("Models in target unit")
+    plt.title("Psipowers depending on number of models in unit")
+    plt.xticks(ms)
     plt.grid()
+    plt.legend()
     plt.show()
+    
+    # m
+    fig1, ax1 = plt.subplots()    
+    for power_name, data in t_powers.items():
+        plt.plot(ts, data, ".-", label = power_name)
+    plt.ylabel("Mortal  wounds inflicted")
+    plt.xlabel("Target toughness")
+    plt.title("Psipowers depending on toughness")
+    plt.xticks(ts)
+    plt.grid()
+    plt.legend()
+    plt.show()
+
+    #for i in range(7):
+        #list(ld_powers.values())[i*len(lds):(i+1)*len(lds)]
+        #plt.plot(lds, , label=list(ld_powers.keys())[0][0:-4] )
+    #plt.grid()
+    #plt.show()
+    
+    #fig1, ax1 = plt.subplots()    
+    #ld_powers = {k: v for k, v in sorted(ld_powers.items(), key=lambda item: np.mean(item[1]))}    
+    #ac_core.boxplot(list(ld_powers.values()), ax1, list(ld_powers.keys()), rotation = 90)
+    #plt.title('Psychic powers (leadership) top')    
+    #plt.ylabel("Mortal  wounds inflicted")
+    #plt.xlabel("Powers")
+    #fig1.autofmt_xdate()
+    #plt.grid()
+    #plt.show()
 
