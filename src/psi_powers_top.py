@@ -679,8 +679,8 @@ if __name__ == '__main__' :
     # all
     fig1, ax1 = plt.subplots()    
     all_powers = {k: v for k, v in sorted(all_powers.items(), key=lambda item: np.mean(item[1]))}    
-    #ac_core.boxplot(list(all_powers.values()), ax1, list(all_powers.keys()), rotation = 90)
-    ac_core.boxplot([all_powers['Tzeench firestorm']], ax1, ['Tzeench firestorm'], rotation = 90)
+    ac_core.boxplot(list(all_powers.values()), ax1, list(all_powers.keys()), rotation = 90)
+    #ac_core.boxplot([all_powers['Tzeench firestorm']], ax1, ['Tzeench firestorm'], rotation = 90)
     plt.title('Psychic powers top')    
     plt.ylabel("Mortal  wounds inflicted")
     plt.xlabel("Powers")    
