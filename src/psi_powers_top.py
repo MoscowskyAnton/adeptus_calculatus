@@ -469,7 +469,7 @@ class Psionic_blast(Psychic_power):
         d = 0
         if pt1:
             r = ac_core.d6() + ac_core.d6()            
-            if r <= ld:
+            if r < ld:
                 d = 1
             else:
                 d = ac_core.d3()
@@ -477,13 +477,17 @@ class Psionic_blast(Psychic_power):
         
 if __name__ == '__main__' :
     
-    data = []
-    labels = []
+    all_powers = {}
     
     def add_power( results ):
         (d, l) = results        
-        data.append(d)
-        labels.append(l)
+        all_powers[l] = d
+    
+    ld_powers = {}
+    lds = [5,6,7,8,9,10]
+    def add_ld_power( results ):
+        (d, l) = results
+        ld_powers[l] = d
     
     smite = Smite()    
     add_power( smite.test_power() )
@@ -549,38 +553,76 @@ if __name__ == '__main__' :
     add_power( bb.test_power(t = 3) )
     add_power( bb.test_power(t = 4) )
     
+    # LD
     ps = Purge_soul()
     add_power( ps.test_power(ld = 6) )
     add_power( ps.test_power(ld = 9) )
+    for ld in lds:
+        add_ld_power( ps.test_power(ld = ld))
     
     mw = Mind_war()
     add_power( mw.test_power(ld = 6) )
     add_power( mw.test_power(ld = 9) )
+    for ld in lds:
+        add_ld_power( mw.test_power(ld = ld))
     
     cc = Cacophonic_choir()
     add_power( cc.test_power(ld = 6) )
     add_power( cc.test_power(ld = 9) )
+    for ld in lds:
+        add_ld_power( cc.test_power(ld = ld))
     
     t = Trephination()
     add_power( t.test_power(ld = 6) )
     add_power( t.test_power(ld = 9) )
+    for ld in lds:
+        add_ld_power( t.test_power(ld = ld))
     
     c = Castigation()
     add_power( c.test_power(ld = 6) )
     add_power( c.test_power(ld = 9) )
+    for ld in lds:
+        add_ld_power( c.test_power(ld = ld))
     
-    ps = Psychic_scourge()
-    add_power( ps.test_power(ld = 6) )
-    add_power( ps.test_power(ld = 9) )
+    ps_ = Psychic_scourge()
+    add_power( ps_.test_power(ld = 6) )
+    add_power( ps_.test_power(ld = 9) )
+    for ld in lds:
+        add_ld_power( ps_.test_power(ld = ld))
     
     pb = Psionic_blast()
     add_power( pb.test_power(ld = 6) )
     add_power( pb.test_power(ld = 9) )
+    for ld in lds:
+        add_ld_power( pb.test_power(ld = ld))
+        
     
-    fig1, ax1 = plt.subplots()
-    
-    ac_core.boxplot(data, ax1, labels, rotation = 45)
+    # all
+    fig1, ax1 = plt.subplots()    
+    all_powers = {k: v for k, v in sorted(all_powers.items(), key=lambda item: np.mean(item[1]))}    
+    ac_core.boxplot(list(all_powers.values()), ax1, list(all_powers.keys()), rotation = 90)
+    plt.title('Psychic powers top')    
+    plt.ylabel("Mortal  wounds inflicted")
+    plt.xlabel("Powers")
+    fig1.autofmt_xdate()
     plt.grid()
     plt.show()
     
+    # ld
+    fig1, ax1 = plt.subplots()    
+    for i in range(7):
+        list(ld_powers.values())[i*len(lds):(i+1)*len(lds)]
+        plt.plot(lds, , label=list(ld_powers.keys())[0][0:-4] )
+    plt.grid()
+    plt.show()
+    
+    fig1, ax1 = plt.subplots()    
+    ld_powers = {k: v for k, v in sorted(ld_powers.items(), key=lambda item: np.mean(item[1]))}    
+    ac_core.boxplot(list(ld_powers.values()), ax1, list(ld_powers.keys()), rotation = 90)
+    plt.title('Psychic powers (leadership) top')    
+    plt.ylabel("Mortal  wounds inflicted")
+    plt.xlabel("Powers")
+    fig1.autofmt_xdate()
+    plt.grid()
+    plt.show()
 
