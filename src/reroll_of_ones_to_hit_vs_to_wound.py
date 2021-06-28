@@ -32,13 +32,14 @@ def do_seq_2( to_hit, to_wound):
     elif h == 1:
         h = ac_core.d6()
         if h >= to_hit:
-            res[0] = 1
+            if w >= to_wound:
+                res[0] = 1
     return res
         
 
 if __name__ == '__main__' :
     
-    N = 1000000
+    N = 10000000
     
     to_hits = [2, 3, 4, 5, 6]
     to_wounds = [2, 3, 4, 5, 6]
