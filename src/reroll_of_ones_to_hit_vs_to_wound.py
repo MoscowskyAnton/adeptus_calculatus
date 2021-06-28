@@ -38,7 +38,7 @@ def do_seq_2( to_hit, to_wound):
 
 if __name__ == '__main__' :
     
-    N = 10000
+    N = 1000000
     
     to_hits = [2, 3, 4, 5, 6]
     to_wounds = [2, 3, 4, 5, 6]
@@ -72,14 +72,15 @@ if __name__ == '__main__' :
     plus_one = [2, 3, 4, 5, 6, 7]
     
     diff = data[:,:,0] - data[:,:,1]
-    print(data)
+    #print(data)
     
     maxv = max(np.max(diff),np.abs(np.min(diff)))*2
     ax.pcolormesh(plus_one, plus_one, -diff.T, cmap = plt.get_cmap('coolwarm'), shading = 'flat', vmin = -maxv, vmax = maxv)
     
     for i, vi in enumerate(to_hits):
         for j, vj in enumerate(to_wounds):
-            text = "{:.1f}/{:.1f}/{:.1f}".format(data[i,j,0], data[i,j,2], data[i,j,1])
+            #text = "{:.1f}/{:.1f}/{:.1f}".format(data[i,j,0], data[i,j,2], data[i,j,1])
+            text = "{:.2f}".format(diff[i,j])
             
             plt.text(vi+0.5, vj+0.5, text, ha = 'center', va='center')
             
