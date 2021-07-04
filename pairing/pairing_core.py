@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # coding: utf-8
 import numpy as np
+import matplotlib.pyplot as plt
+
 
 class PairingTable(object):
     
@@ -347,7 +349,15 @@ class PairingGame(object):
         self.make_random_move('B', 'atacks')
         self.make_optimal_move('A', 'chooseAtack')
         self.make_random_move('B', 'chooseAtack')
-        
+    
+    def play_random_vs_optimal(self):
+        self.make_random_move('A', 'def')
+        self.make_optimal_move('B', 'def')
+        self.make_random_move('A', 'atacks')
+        self.make_optimal_move('B', 'atacks')
+        self.make_random_move('A', 'chooseAtack')
+        self.make_optimal_move('B', 'chooseAtack')
+    
 if __name__ == '__main__' :
     
     '''
@@ -356,23 +366,41 @@ if __name__ == '__main__' :
                                 [7,8,9,10],
                                 [20,20,0,0]]))
     '''
-    pt = PairingTable(np.random.randint(0,21,(4,4)))
-    pg = PairingGame(pt)
-    
-    print(pg.PT)
-    print('TEAM A mean score = {}'.format(pg.PT.mean()))
-    
-    pg.play_optimal_way()
-    score_optimal = pg.get_score()
-    pg.print_results()
-    
-    scores_optimal_vs_random = []
-    N = 10
-    for n in range(N):
-        pg.reset()
-        pg.play_optimal_vs_random()
-        scores_optimal_vs_random.append(pg.get_score())
-        pg.print_results()
+    M = 10
+    N = 20
+    optimal_scores = []
+    random_scores = []
+    for m in range(M):
+        pt = PairingTable(np.random.randint(0,21,(4,4)))
+        pg = PairingGame(pt)
         
-    print(score_optimal, scores_optimal_vs_random)
+        print(pg.PT)
+        print('TEAM A mean score = {}'.format(pg.PT.mean()))
+        
+        pg.play_optimal_way()
+        score_optimal = pg.get_score()
+        pg.print_results()
+        optimal_scores.append(score_optimal)
+    
+        scores_optimal_vs_random = []
+        
+        for n in range(N):
+            pg.reset()
+            pg.play_optimal_vs_random()
+            scores_optimal_vs_random.append(pg.get_score())
+            pg.print_results()
+        random_scores.append(scores_optimal_vs_random)
+        
+    print(optimal_scores, random_scores)
+    plt.plot(optimal_scores,'r-', label="Minimax both players")
+    for i, rs in enumerate(random_scores):
+        plt.plot([i]*len(rs), rs,'b.')
+    
+    plt.title('Minimax vs random moves')
+    plt.legend()
+    plt.ylabel('game score')
+    plt.xlabel('# exp')
+    plt.grid()
+    plt.show()
+    
         
