@@ -19,7 +19,6 @@ class PairingTable(object):
         if scores.shape[0] != scores.shape[1]:
             raise ValueError("ParingTable: __init__: scores dimentional size must be equal, but got {} and {}".format(scores.shape[0], scores.shape[1]))
                              
-            
         self.scores = scores
         
         self.players_num = self.scores.shape[0]
@@ -28,7 +27,19 @@ class PairingTable(object):
         self.min_player_score = min_score
         self.max_team_score = max_score * self.players_num
         self.min_team_score = min_score * self.players_num
-        
+    
+    def get_random_indexes(self, N):
+        indexes = []
+        for n in range(N):
+            i = np.random.randint(0, self.players_num)
+            j = np.random.randint(0, self.players_num)
+            ind = (i, j)
+            while ind in indexes:
+                i = np.random.randint(0, self.players_num)
+                j = np.random.randint(0, self.players_num)
+                ind = (i, j)
+            indexes.append(ind)
+        return indexes
     
     def __str__(self):
         return self.scores.__str__()
@@ -374,7 +385,7 @@ if __name__ == '__main__' :
         pt = PairingTable(np.random.randint(0,21,(4,4)))
         pg = PairingGame(pt)
         
-        print(pg.PT)
+        #print(pg.PT)
         print('TEAM A mean score = {}'.format(pg.PT.mean()))
         
         pg.play_optimal_way()
