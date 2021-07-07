@@ -2,95 +2,22 @@
 # coding: utf-8
 import numpy as np
 import matplotlib.pyplot as plt
+from pairing_core import PairingTable, PairingGame
+import copy
 
-
-class PairingTable(object):
+class PairingGame2(object):
     
-    '''
-    scores - square matrix (np.array) with scores of A team (row-oriented: [i][j] - score how team A player i beat team B player j)
-    min_score - minamal possible score of one player
-    max_score - maximal possible score of one player
-    '''
-    def __init__(self, scores, min_score = 0, max_score = 20, teamA_player_names = None, teamB_player_names = None):
-        if not type(scores) is np.ndarray:
-            raise ValueError("PairingTable: __init__: scores must be numpy array, not {}".format(type(scores)))
-        if len(scores.shape) != 2:
-            raise ValueError("ParingTable: __init__: scores must be 2D -matrix, not {} dimentional".format(len(scores.shape)))
-        if scores.shape[0] != scores.shape[1]:
-            raise ValueError("ParingTable: __init__: scores dimentional size must be equal, but got {} and {}".format(scores.shape[0], scores.shape[1]))
-                             
-        self.scores = scores
-        
-        self.teamA_player_names = teamA_player_names
-        self.teamB_player_names = teamB_player_names
-        
-        self.players_num = self.scores.shape[0]
-        
-        self.max_player_score = max_score
-        self.min_player_score = min_score
-        self.max_team_score = max_score * self.players_num
-        self.min_team_score = min_score * self.players_num
-    
-    def get_random_indexes(self, N):
-        indexes = []
-        for n in range(N):
-            i = np.random.randint(0, self.players_num)
-            j = np.random.randint(0, self.players_num)
-            ind = (i, j)
-            while ind in indexes:
-                i = np.random.randint(0, self.players_num)
-                j = np.random.randint(0, self.players_num)
-                ind = (i, j)
-            indexes.append(ind)
-        return indexes
-    
-    def __str__(self):
-        return self.scores.__str__()
-    
-    def __getitem__(self, indices):
-        return self.scores[indices]
-    
-    def mean(self):
-        return np.mean(self.scores)
-    
-    def plot(self):
-        fig, ax = plt.subplots()
-        #players = np.array([0,1,2,3,4])
-        players = np.arange(self.players_num+1)
-        ax.pcolormesh(players, -players, self.scores, vmin = self.min_player_score, vmax = self.max_player_score, cmap=plt.get_cmap('RdYlGn'))
-        for i in range(self.players_num):
-            for j in range(self.players_num):
-                text = "{}".format(self.scores[j,i])
-                plt.text(i+0.5,-j-0.5,text, ha = 'center', va='center')
-        
-        plt.ylabel("TEAM A")
-        plt.xlabel("TEAM B")
-        plt.title("Pairing table")
-        if self.teamA_player_names is None:
-            plt.yticks(-players[:self.players_num]-0.5, players[:self.players_num])
-        else:
-            plt.yticks(-players[:self.players_num]-0.5, self.teamA_player_names)
-            
-            
-        if self.teamB_player_names is None:
-            plt.xticks(players[:self.players_num]+0.5, players[:self.players_num])
-        else:
-            plt.xticks(players[:self.players_num]+0.5, self.teamB_player_names)
-        
-        
-    
-class PairingGame(object):
-    
-    def __init__(self, pairing_table):
-        self.PT = pairing_table
+    def __init__(self, pairing_table_1, pairing_table_2):
+        self.PT1 = pairing_table_1
+        self.PT2 = pairing_table_2
         
         self.reset()
         
         self.game_seq = ['def', 'atacks', 'chooseAtack']
         
     def reset(self):
-        self.team_A_state = [True] * self.PT.players_num
-        self.team_B_state = [True] * self.PT.players_num
+        self.team_A_state = [True] * self.PT1.players_num
+        self.team_B_state = [True] * self.PT1.players_num
         
         self.team_A_def = None
         self.team_B_def = None
@@ -104,27 +31,31 @@ class PairingGame(object):
         self.team_B_champion = None
     
     def get_score(self):
-        score = 0
-        #print(self.team_A_atackers)
-        score += self.PT[self.team_A_def, self.team_B_choosed_atacker]
-        score += self.PT[self.team_A_choosed_atacker, self.team_B_def]
-        score += self.PT[self.team_A_reject_atacker, self.team_B_reject_atacker]
-        score += self.PT[self.team_A_champion, self.team_B_champion]
+        score1 = 0
+        score1 += self.PT1[self.team_A_def, self.team_B_choosed_atacker]
+        score1 += self.PT1[self.team_A_choosed_atacker, self.team_B_def]
+        score1 += self.PT1[self.team_A_reject_atacker, self.team_B_reject_atacker]
+        score1 += self.PT1[self.team_A_champion, self.team_B_champion]
         #print(self.team_A_def, self.team_B_choosed_atacker,self.team_B_def, self.team_A_choosed_atacker,self.team_A_reject_atacker, self.team_B_reject_atacker,self.team_A_champion, self.team_B_champion)
         #print(score)
-        return score
+        score2 = 0
+        score2 += self.PT2[self.team_A_def, self.team_B_choosed_atacker]
+        score2 += self.PT2[self.team_A_choosed_atacker, self.team_B_def]
+        score2 += self.PT2[self.team_A_reject_atacker, self.team_B_reject_atacker]
+        score2 += self.PT2[self.team_A_champion, self.team_B_champion]
+        return score1, score2
     
     def print_results(self):
-        sc = self.get_score()
-        print("Total score A {} : {} B".format(sc, self.PT.max_team_score - sc))
+        sc, _ = self.get_score()
+        print("Total score A {} : {} B".format(sc, self.PT1.max_team_score - sc))
         
-        print("DefA ({}) vs AtackB ({}) - {}".format(self.team_A_def, self.team_B_choosed_atacker, self.PT[self.team_A_def, self.team_B_choosed_atacker]))
+        print("DefA ({}) vs AtackB ({}) - {}".format(self.team_A_def, self.team_B_choosed_atacker, self.PT1[self.team_A_def, self.team_B_choosed_atacker]))
         
-        print("AtackA ({}) vs DefB ({}) - {}".format( self.team_A_choosed_atacker, self.team_B_def, self.PT[ self.team_A_choosed_atacker,self.team_B_def]))
+        print("AtackA ({}) vs DefB ({}) - {}".format( self.team_A_choosed_atacker, self.team_B_def, self.PT1[ self.team_A_choosed_atacker,self.team_B_def]))
         
-        print("RejA ({}) vs RejB ({}) - {}".format(self.team_A_reject_atacker, self.team_B_reject_atacker, self.PT[self.team_A_reject_atacker, self.team_B_reject_atacker]))
+        print("RejA ({}) vs RejB ({}) - {}".format(self.team_A_reject_atacker, self.team_B_reject_atacker, self.PT1[self.team_A_reject_atacker, self.team_B_reject_atacker]))
         
-        print("ChampA ({}) vs ChampB ({}) - {}".format(self.team_A_champion, self.team_B_champion, self.PT[self.team_A_champion, self.team_B_champion]))
+        print("ChampA ({}) vs ChampB ({}) - {}".format(self.team_A_champion, self.team_B_champion, self.PT1[self.team_A_champion, self.team_B_champion]))
         
     def set_def(self, team, player_i):
         if team == 'A':
@@ -208,16 +139,19 @@ class PairingGame(object):
               
     # team A turn
     def max(self, state):
-        total_score = self.PT.min_team_score
+        total_score1 = self.PT1.min_team_score
+        total_score2 = self.PT2.min_team_score
+        
         player_selected = None
         
         if state == 'def':
             for player_i, player_free in enumerate(self.team_A_state):
                 if player_free:
                     self.set_def('A', player_i)
-                    sc, pl = self.min(state)
-                    if sc >= total_score:
-                        total_score = sc
+                    sc1, sc2, pl = self.min(state)
+                    if sc1 >= total_score1:
+                        total_score1 = sc1
+                        total_score2 = sc2
                         player_selected = player_i
                     self.release_def('A')
                     
@@ -228,9 +162,10 @@ class PairingGame(object):
                         
                         self.set_atackers('A', player_ii, player_jj, True)
                         
-                        sc, pl = self.min(state)
-                        if sc >= total_score:
-                            total_score = sc
+                        sc1, sc2, pl = self.min(state)
+                        if sc1 >= total_score1:
+                            total_score1 = sc1
+                            total_score2 = sc2
                             player_selected = [player_ii, player_jj]
                             
                         self.release_atackers('A', True)
@@ -242,30 +177,33 @@ class PairingGame(object):
             for i, j in atackers:
                 self.choose_atacker('B', i, j)# yes B
                 
-                sc, pl = self.min(state)
+                sc1, sc2, pl = self.min(state)
                 
-                if sc >= total_score:
-                    total_score = sc
+                if sc1 >= total_score1:
+                    total_score1 = sc2
+                    total_score2 = sc2
                     player_selected = i
                 
                 self.unchoose_atacker('B')
         
-        return total_score, player_selected
+        return total_score1, total_score2, player_selected
      
     # team B turn
     def min(self, state):
-        total_score = self.PT.max_team_score
+        total_score1 = self.PT1.max_team_score
+        total_score2 = self.PT2.max_team_score
         player_selected = None
         
         if state == 'def':
             for player_i, player_free in enumerate(self.team_B_state):
                 if player_free:
                     self.set_def('B', player_i)
-                    sc, pl = self.max('atacks')
+                    sc1, sc2, pl = self.max('atacks')
                     
-                    if sc <= total_score:
+                    if sc2 <= total_score2:
                         player_selected = player_i
-                        total_score = sc
+                        total_score1 = sc1
+                        total_score2 = sc2
                     
                     self.release_def('B')
                     
@@ -276,9 +214,10 @@ class PairingGame(object):
                         
                         self.set_atackers('B', player_ii, player_jj, True)
                         
-                        sc, pl = self.max('chooseAtack')
-                        if sc <= total_score:
-                            total_score = sc
+                        sc1, sc2, pl = self.max('chooseAtack')
+                        if sc2 <= total_score2:
+                            total_score1 = sc1
+                            total_score2 = sc2
                             player_selected = [player_ii, player_jj]
                             
                         self.release_atackers('B', True)
@@ -289,43 +228,44 @@ class PairingGame(object):
             for i, j in atackers:
                 self.choose_atacker('A', i, j) # yes, A
                 
-                sc = self.get_score()
-                if sc <= total_score:
+                sc1, sc2 = self.get_score()
+                if sc2 <= total_score2:
                     player_selected = i
-                    total_score = sc
+                    total_score1 = sc1
+                    total_score2 = sc2
                     
                 self.unchoose_atacker('A')
         else:
             print('ERROR! unknown phase {}'.format(phase))        
         
-        return total_score, player_selected
+        return total_score1, total_score2, player_selected
     
     def make_optimal_move(self, team, phase):
         if phase == 'def':
             if team == 'A':
-                score, defender = self.max('def')
+                score1, score2, defender = self.max('def')
             elif team == 'B':
-                score, defender = self.min('def')
+                score1, score2, defender = self.min('def')
             self.set_def(team, defender)
-            print('TEAM {}: recomend to set defender {} for max score {}'.format(team, defender, score))
+            print('TEAM {}: recomend to set defender {} for max score {}'.format(team, defender, score1))
         elif phase == 'atacks':
             if team == 'A':
-                score, atackers = self.max('atacks')
+                score1, score2, atackers = self.max('atacks')
             elif team == 'B':
-                score, atackers = self.min('atacks')
+                score1, score2, atackers = self.min('atacks')
             self.set_atackers(team, atackers[0], atackers[1], True)
-            print('TEAM {}: recomend to set atackers {} for max score {}'.format(team, atackers, score))
+            print('TEAM {}: recomend to set atackers {} for max score {}'.format(team, atackers, score1))
         elif phase == 'chooseAtack':
             if team == 'A':
-                score, choosed = self.max('chooseAtack')
+                score1, score2, choosed = self.max('chooseAtack')
                 self.choose_atacker('B', choosed, None)
             elif team == 'B':
-                score, choosed = self.min('chooseAtack')
+                score1, score2, choosed = self.min('chooseAtack')
                 self.choose_atacker('A', choosed, None)
-            print('TEAM {}: recomend choose player {} from oppsite atackers, for score {}'.format(team, choosed, score))
+            print('TEAM {}: recomend choose player {} from oppsite atackers, for score {}'.format(team, choosed, score1))
         else:
             print('ERROR! unknown phase {}'.format(phase))
-        return score
+        return score1, score2
     
     def random_choose_free_player(self, team):
         if team == 'A':
@@ -397,50 +337,28 @@ class PairingGame(object):
         self.make_optimal_move('B', 'atacks')
         self.make_random_move('A', 'chooseAtack')
         self.make_optimal_move('B', 'chooseAtack')
-    
+        
 if __name__ == '__main__' :
+    pt = PairingTable(np.random.randint(0,21,(4,4)), teamA_player_names = ['Starrok', 'Aberrat', 'Strohkopf', 'Servius'])
+    ri = np.random.randint(0,4)
+    rj = np.random.randint(0,4)
+    print('Fixed value: {} {}'.format(ri, rj))
+    #pt.scores[0,0] = 20
+    #pt.scores[1,1] = 20
+    #pt.scores[2,2] = 20
+    pt.scores[ri,rj] = 20
+    pt.plot()
+    print(pt)
+    pt2 = copy.deepcopy(pt)
+    #pt2.scores[0,0] = 0
+    #pt2.scores[1,1] = 0
+    #pt2.scores[2,2] = 0
+    pt2.scores[ri,rj] = 0
+    pt2.plot()
+    pg = PairingGame2(pt, pt2)
     
-    '''
-    pt = PairingTable(np.array([[0,5,10,20],
-                                [19,9,4,0],
-                                [7,8,9,10],
-                                [20,20,0,0]]))
-    '''
-    M = 10
-    N = 20
-    optimal_scores = []
-    random_scores = []
-    for m in range(M):
-        pt = PairingTable(np.random.randint(0,21,(4,4)))
-        pg = PairingGame(pt)
-        
-        #print(pg.PT)
-        print('TEAM A mean score = {}'.format(pg.PT.mean()))
-        
-        pg.play_optimal_way()
-        score_optimal = pg.get_score()
-        pg.print_results()
-        optimal_scores.append(score_optimal)
-    
-        scores_optimal_vs_random = []
-        
-        for n in range(N):
-            pg.reset()
-            pg.play_optimal_vs_random()
-            scores_optimal_vs_random.append(pg.get_score())
-            pg.print_results()
-        random_scores.append(scores_optimal_vs_random)
-        
-    print(optimal_scores, random_scores)
-    plt.plot(optimal_scores,'r-', label="Minimax both players")
-    for i, rs in enumerate(random_scores):
-        plt.plot([i]*len(rs), rs,'b.')
-    
-    plt.title('Minimax vs random moves')
-    plt.legend()
-    plt.ylabel('game score')
-    plt.xlabel('# exp')
-    plt.grid()
+    pg.play_optimal_way()
+    pg.print_results()
+    scA, scB = pg.get_score()
+    print("Game ends with scores A({}) B({})".format(scA, scB))
     plt.show()
-    
-        
