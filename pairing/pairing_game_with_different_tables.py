@@ -346,7 +346,7 @@ if __name__ == '__main__' :
     #pt.scores[0,0] = 20
     #pt.scores[1,1] = 20
     #pt.scores[2,2] = 20
-    pt.scores[ri,rj] = 20
+    #pt.scores[ri,rj] = 20
     pt.plot()
     print(pt)
     pt2 = copy.deepcopy(pt)
@@ -360,5 +360,14 @@ if __name__ == '__main__' :
     pg.play_optimal_way()
     pg.print_results()
     scA, scB = pg.get_score()
-    print("Game ends with scores A({}) B({})".format(scA, scB))
+    # check
+    pg1 = PairingGame(pt)
+    pg1.play_optimal_way()
+    rsc1 = pg1.get_score()
+    
+    pg2 = PairingGame(pt2)
+    pg2.play_optimal_way()
+    rsc2 = pg2.get_score()
+    
+    print("Game ends with scores A({})[{}] B({})[{}]".format(scA,rsc1, scB, rsc2))
     plt.show()
