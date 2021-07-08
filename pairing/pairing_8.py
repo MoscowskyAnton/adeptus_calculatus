@@ -216,43 +216,65 @@ class PairingGame8(object):
         
         self.print_results()
         
-    def max(self, stage, phase):
+    def max(self, stage, phase, alpha, beta):
         #print(self.team)
         max_score = self.PT.min_team_score
         move = None
         
         if phase == 'DEFENDER':
             for player, free in enumerate(self.team['A']['state']):
+                if stage == 1:
+                    print("Calculating def {}...".format(player))
                 if free:
                     self.set_defender('A', stage, player)
-                    score, _ = self.min(stage, phase)
+                    score, _ = self.min(stage, phase, alpha, beta)
                     if score >= max_score:
                         max_score = score
                         move = player
                     self.unset_defender('A', stage)
+                    
+                    if max_score > beta:
+                        return max_score, move
+                    
+                    if max_score > alpha:
+                        alpha = max_score
+                        
         elif phase == 'ATACKERS':
             for player1, free1 in enumerate(self.team['A']['state']):
                 for player2, free2 in enumerate(self.team['A']['state']):
                     if player1 != player2 and free1 and free2:
                         self.set_atackers('A', stage, player1, player2)
-                        score, _ = self.min(stage, phase)
+                        score, _ = self.min(stage, phase, alpha, beta)
                         if score >= max_score:
                             max_score = score
                             move = [player1, player2]
                         self.unset_atackers('A', stage)
+                        
+                        if max_score > beta:
+                            return max_score, move
+                    
+                        if max_score > alpha:
+                            alpha = max_score
+                            
         elif phase == 'CHOOSE':
             for choose in [0, 1]:
                 self.choose_atacker('B', stage, choose)#sure B
-                score, _ = self.min(stage, phase)
+                score, _ = self.min(stage, phase, alpha, beta)
                 if score >= max_score:
                     max_score = score
                     move = self.team['B']['{}_atackers'.format(stage)][choose]
                 self.unchoose_atacker('B', stage)
+                
+                if max_score > beta:
+                    return max_score, move
+                    
+                if max_score > alpha:
+                    alpha = max_score
         else:
             raise ValueError('Error in (max) unknown phase {}'.format(phase))
         return max_score, move
         
-    def min(self, stage, phase):
+    def min(self, stage, phase, alpha, beta):
         #print(self.team)
         min_score = self.PT.max_team_score
         move = None
@@ -261,26 +283,39 @@ class PairingGame8(object):
             for player, free in enumerate(self.team['B']['state']):
                 if free:
                     self.set_defender('B', stage, player)
-                    score, _ = self.max(stage, 'ATACKERS')
+                    score, _ = self.max(stage, 'ATACKERS', alpha, beta)
                     if score <= min_score:
                         min_score = score
                         move = player
                     self.unset_defender('B', stage)
+                    
+                    if min_score < alpha:
+                        return min_score, move
+                    
+                    if min_score < beta:
+                        beta = min_score
+                    
         elif phase == 'ATACKERS':
             for player1, free1 in enumerate(self.team['B']['state']):
                 for player2, free2 in enumerate(self.team['B']['state']):
                     if player1 != player2 and free1 and free2:
                         self.set_atackers('B', stage, player1, player2)
-                        score, _ = self.max(stage, 'CHOOSE')
+                        score, _ = self.max(stage, 'CHOOSE', alpha, beta)
                         if score <= min_score:
                             min_score = score
                             move = [player1, player2]
                         self.unset_atackers('B', stage)
+                        
+                        if min_score < alpha:
+                            return min_score, move
+                    
+                        if min_score < beta:
+                            beta = min_score
         elif phase == 'CHOOSE':
             for choose in [0, 1]:
                 self.choose_atacker('A', stage, choose)#sure B
                 if stage == 1 or stage == 2:
-                    score, _ = self.max(stage+1, 'DEFENDER')
+                    score, _ = self.max(stage+1, 'DEFENDER', alpha, beta)
                 elif stage == 3:
                     score = self.get_score()
                 else:
@@ -290,12 +325,18 @@ class PairingGame8(object):
                     min_score = score
                     move = self.team['A']['{}_atackers'.format(stage)][choose]
                 self.unchoose_atacker('A', stage)
+                
+                if min_score < alpha:
+                    return min_score, move
+                    
+                if min_score < beta:
+                    beta = min_score
         else:
             raise ValueError('Error in (min) unknown phase {}'.format(phase))
         return min_score, move
     
     def play_optimal(self):
-        score, player = self.max(1,'DEFENDER')
+        score, player = self.max(1,'DEFENDER', self.PT.min_team_score, self.PT.max_team_score)
         print(score, player)
         #for stage in [1,2,3]:
             #self.max(stage, 'DEFENDER')
