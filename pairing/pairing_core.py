@@ -53,15 +53,18 @@ class PairingTable(object):
     def mean(self):
         return np.mean(self.scores)
     
-    def plot(self):
+    def plot(self, selectedA = [], selectedB = []):
         fig, ax = plt.subplots()
         #players = np.array([0,1,2,3,4])
         players = np.arange(self.players_num+1)
         ax.pcolormesh(players, -players, self.scores, vmin = self.min_player_score, vmax = self.max_player_score, cmap=plt.get_cmap('RdYlGn'))
         for i in range(self.players_num):
             for j in range(self.players_num):
-                text = "{}".format(self.scores[j,i])
-                plt.text(i+0.5,-j-0.5,text, ha = 'center', va='center')
+                text = "{}".format(self.scores[j,i]) # feature not bug
+                if selectedA.index(j) == selectedB.index(i):
+                    plt.text(i+0.5,-j-0.5,text, ha = 'center', va='center', fontweight = 'extra bold')
+                else:
+                    plt.text(i+0.5,-j-0.5,text, ha = 'center', va='center')
         
         plt.ylabel("TEAM A")
         plt.xlabel("TEAM B")
