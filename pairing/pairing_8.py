@@ -90,11 +90,10 @@ class PairingGame8(object):
         return selectedA, selectedB
     
     def set_defender(self, team, stage, player):
-        if self.team[team]['state'][player]:
-            self.team[team]['state'][player] = False
-            self.team[team]['{}_def'.format(stage)] = player
-        else:
+        if not self.team[team]['state'][player]:
             raise ValueError('Error in (set_defender) player {} of team {} already taken!'.format(team, player))
+        self.team[team]['state'][player] = False
+        self.team[team]['{}_def'.format(stage)] = player
         
     def unset_defender(self, team, stage):
         name = '{}_def'.format(stage)
@@ -169,17 +168,17 @@ class PairingGame8(object):
             raise ValueError('Error in (unchoose_atacker) atacker has been even not selected')
         if self.team[team]['state'][choosed]:
             raise ValueError('Error in (unchoose_atacker) atacker has been already unselected')
-        else:
-            self.team[team]['state'][choosed] = True
-            self.team[team][name] = None
-            if stage == 3:
-                # also clear champion and rejected
-                champ = self.team[team]['champion']
-                rej = self.team[team]['rejected']
-                self.team[team]['state'][champ] = True
-                self.team[team]['state'][rej] = True
-                self.team[team]['champion'] = None
-                self.team[team]['rejected'] = None
+        
+        self.team[team]['state'][choosed] = True
+        self.team[team][name] = None
+        if stage == 3:
+            # also clear champion and rejected
+            champ = self.team[team]['champion']
+            rej = self.team[team]['rejected']
+            self.team[team]['state'][champ] = True
+            self.team[team]['state'][rej] = True
+            self.team[team]['champion'] = None
+            self.team[team]['rejected'] = None
     
     def get_random_free_player(self, team):
         # TODO check if not all taken
@@ -264,7 +263,9 @@ class PairingGame8(object):
                 score, _ = self.min(stage, phase, alpha, beta)
                 if score > max_score:
                     max_score = score
-                    move = self.team['B']['{}_atackers'.format(stage)][choose]
+                    #move = self.team['B']['{}_atackers'.format(stage)][choose]
+                    move = choose
+                    
                 self.unchoose_atacker('B', stage)
                 
                 if max_score >= beta:
@@ -331,7 +332,9 @@ class PairingGame8(object):
                     
                 if score < min_score:
                     min_score = score
-                    move = self.team['A']['{}_atackers'.format(stage)][choose]
+                    #move = self.team['A']['{}_atackers'.format(stage)][choose]
+                    move = choose
+                    
                 self.unchoose_atacker('A', stage)
                 
                 if min_score <= alpha:
@@ -344,8 +347,33 @@ class PairingGame8(object):
             raise ValueError('Error in (min) unknown phase {}'.format(phase))
         return min_score, move
     
+    def make_optimal_move(self, team, stage, phase, verbose = False):
+        alpha_start = self.PT.min_team_score
+        beta_start = self.PT.max_team_score
+        if team == 'A':
+            score, player = self.max(stage, phase, alpha_start, beta_start)
+        elif team == 'B':
+            score, player = self.min(stage, phase, alpha_start, beta_start)
+        if phase == 'DEFENDER':
+            self.set_defender(team, stage, player)
+            if verbose:
+                print('TEAM{}: recomended {} defender: #{}'.format(team, stage, player))
+        elif phase == 'ATACKERS':
+            self.set_atackers(team, stage, player[0], player[1])
+            if verbose:
+                print('TEAM{}: recomended {} attackers: #{}'.format(team, stage, player))
+        elif phase == 'CHOOSE':
+            self.choose_atacker(team, stage, player)
+            player_no = self.team[team]['{}_atackers'.format(stage)][choose]
+            if verbose:
+                print('TEAM{}: recomended {} defender: #{}'.format(team, stage, player_no))
+        else:
+            raise ValueError('Error in (make_optimal_move) unknown phase {}'.format(phase))
+        return score, player
+    
     def play_optimal(self):
-        score, player = self.max(1,'DEFENDER', self.PT.min_team_score, self.PT.max_team_score)
+        #score, player = self.max(1,'DEFENDER', self.PT.min_team_score, self.PT.max_team_score)
+        score, player = self.make_optimal_move('A', 1, 'DEFENDER', True)
         print(score, player)
         #for stage in [1,2,3]:
             #self.max(stage, 'DEFENDER')

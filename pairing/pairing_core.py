@@ -219,7 +219,7 @@ class PairingGame(object):
                 if player_free:
                     self.set_def('A', player_i)
                     sc, pl = self.min(state)
-                    if sc >= total_score:
+                    if sc > total_score:
                         total_score = sc
                         player_selected = player_i
                     self.release_def('A')
@@ -234,7 +234,7 @@ class PairingGame(object):
                         self.set_atackers('A', player_ii, player_jj, True)
                         
                         sc, pl = self.min(state)
-                        if sc >= total_score:
+                        if sc > total_score:
                             total_score = sc
                             player_selected = [player_ii, player_jj]
                             
@@ -249,7 +249,7 @@ class PairingGame(object):
                 
                 sc, pl = self.min(state)
                 
-                if sc >= total_score:
+                if sc > total_score:
                     total_score = sc
                     player_selected = i
                 
@@ -268,7 +268,7 @@ class PairingGame(object):
                     self.set_def('B', player_i)
                     sc, pl = self.max('atacks')
                     
-                    if sc <= total_score:
+                    if sc < total_score:
                         player_selected = player_i
                         total_score = sc
                     
@@ -284,7 +284,7 @@ class PairingGame(object):
                         self.set_atackers('B', player_ii, player_jj, True)
                         
                         sc, pl = self.max('chooseAtack')
-                        if sc <= total_score:
+                        if sc < total_score:
                             total_score = sc
                             player_selected = [player_ii, player_jj]
                             
@@ -297,7 +297,7 @@ class PairingGame(object):
                 self.choose_atacker('A', i, j) # yes, A
                 
                 sc = self.get_score()
-                if sc <= total_score:
+                if sc < total_score:
                     player_selected = i
                     total_score = sc
                     
