@@ -227,8 +227,10 @@ class PairingGame(object):
         elif state == 'atacks':
             for player_ii, player_i_free in enumerate(self.team_A_state):
                 for player_jj, player_j_free in enumerate(self.team_A_state):
-                    if player_ii != player_jj and player_i_free and player_j_free:
-                        
+                    if player_ii > player_jj and player_i_free and player_j_free:
+                #for player_jj, player_j_free in enumerate(self.team_A_state[player_ii+1:]):
+                    #if player_i_free and player_j_free:
+                                                              
                         self.set_atackers('A', player_ii, player_jj, True)
                         
                         sc, pl = self.min(state)
@@ -275,7 +277,9 @@ class PairingGame(object):
         elif state == 'atacks':
             for player_ii, player_i_free in enumerate(self.team_B_state):
                 for player_jj, player_j_free in enumerate(self.team_B_state):
-                    if player_ii != player_jj and player_i_free and player_j_free:
+                    if player_ii > player_jj and player_i_free and player_j_free:
+                #for player_jj, player_j_free in enumerate(self.team_B_state[player_ii+1:]):
+                    #if player_i_free and player_j_free:
                         
                         self.set_atackers('B', player_ii, player_jj, True)
                         

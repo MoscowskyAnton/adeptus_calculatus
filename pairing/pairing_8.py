@@ -2,7 +2,7 @@
 # coding: utf-8
 import numpy as np
 import matplotlib.pyplot as plt
-
+import time
 from pairing_core import PairingTable
 
 class PairingGame8(object):
@@ -48,7 +48,7 @@ class PairingGame8(object):
         score += self.PT[self.team['A']['3_choosed_atacker'], self.team['B']['3_def']]
         score += self.PT[self.team['A']['rejected'], self.team['B']['rejected']]
         score += self.PT[self.team['A']['champion'], self.team['B']['champion']]
-        
+        #print(score)
         return score
     
     def print_results(self):
@@ -217,14 +217,14 @@ class PairingGame8(object):
         self.print_results()
         
     def max(self, stage, phase, alpha, beta):
-        #print(self.team)
+        #print('A',self.team['A']['state'])
         max_score = self.PT.min_team_score
         move = None
         
         if phase == 'DEFENDER':
             for player, free in enumerate(self.team['A']['state']):
                 if stage == 1:
-                    print("Calculating def {}...".format(player))
+                    print("Calculating 1 def A {}...".format(player))
                 if free:
                     self.set_defender('A', stage, player)
                     score, _ = self.min(stage, phase, alpha, beta)
@@ -234,6 +234,7 @@ class PairingGame8(object):
                     self.unset_defender('A', stage)
                     
                     if max_score > beta:
+                        #print('beta')
                         return max_score, move
                     
                     if max_score > alpha:
@@ -242,7 +243,7 @@ class PairingGame8(object):
         elif phase == 'ATACKERS':
             for player1, free1 in enumerate(self.team['A']['state']):
                 for player2, free2 in enumerate(self.team['A']['state']):
-                    if player1 != player2 and free1 and free2:
+                    if player1 > player2 and free1 and free2:
                         self.set_atackers('A', stage, player1, player2)
                         score, _ = self.min(stage, phase, alpha, beta)
                         if score >= max_score:
@@ -251,6 +252,7 @@ class PairingGame8(object):
                         self.unset_atackers('A', stage)
                         
                         if max_score > beta:
+                            #print('beta')
                             return max_score, move
                     
                         if max_score > alpha:
@@ -266,6 +268,7 @@ class PairingGame8(object):
                 self.unchoose_atacker('B', stage)
                 
                 if max_score > beta:
+                    #print('beta')
                     return max_score, move
                     
                 if max_score > alpha:
@@ -276,11 +279,14 @@ class PairingGame8(object):
         
     def min(self, stage, phase, alpha, beta):
         #print(self.team)
+        #print('B',self.team['B']['state'])
         min_score = self.PT.max_team_score
         move = None
         
         if phase == 'DEFENDER':
             for player, free in enumerate(self.team['B']['state']):
+                if stage == 1:
+                    print("Calculating 1 def B {}...".format(player))
                 if free:
                     self.set_defender('B', stage, player)
                     score, _ = self.max(stage, 'ATACKERS', alpha, beta)
@@ -290,6 +296,7 @@ class PairingGame8(object):
                     self.unset_defender('B', stage)
                     
                     if min_score < alpha:
+                        #print('alpha')
                         return min_score, move
                     
                     if min_score < beta:
@@ -298,7 +305,7 @@ class PairingGame8(object):
         elif phase == 'ATACKERS':
             for player1, free1 in enumerate(self.team['B']['state']):
                 for player2, free2 in enumerate(self.team['B']['state']):
-                    if player1 != player2 and free1 and free2:
+                    if player1 > player2 and free1 and free2:
                         self.set_atackers('B', stage, player1, player2)
                         score, _ = self.max(stage, 'CHOOSE', alpha, beta)
                         if score <= min_score:
@@ -307,6 +314,7 @@ class PairingGame8(object):
                         self.unset_atackers('B', stage)
                         
                         if min_score < alpha:
+                            #print('alpha')
                             return min_score, move
                     
                         if min_score < beta:
@@ -327,6 +335,7 @@ class PairingGame8(object):
                 self.unchoose_atacker('A', stage)
                 
                 if min_score < alpha:
+                    #print('alpha')
                     return min_score, move
                     
                 if min_score < beta:
@@ -367,8 +376,10 @@ if __name__ == '__main__' :
     #pg8.unset_defender('A',1)
     
     #print(pg8.team['A'])
-    
+    tock = time.time()
     pg8.play_optimal()
+    tick = time.time()
+    print(tick-tock)
     
     #selA, selB = pg8.get_selected()
     

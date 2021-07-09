@@ -162,7 +162,7 @@ class PairingGameAlphaBeta(object):
         elif state == 'atacks':
             for player_ii, player_i_free in enumerate(self.team_A_state):
                 for player_jj, player_j_free in enumerate(self.team_A_state):
-                    if player_ii != player_jj and player_i_free and player_j_free:
+                    if player_ii > player_jj and player_i_free and player_j_free:
                         
                         self.set_atackers('A', player_ii, player_jj, True)
                         
@@ -244,7 +244,7 @@ class PairingGameAlphaBeta(object):
         elif state == 'atacks':
             for player_ii, player_i_free in enumerate(self.team_B_state):
                 for player_jj, player_j_free in enumerate(self.team_B_state):
-                    if player_ii != player_jj and player_i_free and player_j_free:
+                    if player_ii > player_jj and player_i_free and player_j_free:
                         
                         self.set_atackers('B', player_ii, player_jj, True)
                         
@@ -421,10 +421,10 @@ if __name__ == '__main__' :
         regular.append(pg_r.get_score())
         alpha_beta.append(pg.get_score())
         
-    #plt.plot(np.array(regular) - np.array(alpha_beta), '.')
-    plt.plot(np.array(reg_time) - np.array(ab_time), '.')
-    plt.grid()
-    plt.title('Alpha-beta pruning time decrease')
-    plt.xlabel('# experiment')
-    plt.ylabel('Time decrease, sec')
+    plt.plot(np.array(regular) - np.array(alpha_beta), '.')
+    #plt.plot(np.array(reg_time) - np.array(ab_time), '.')
+    #plt.grid()
+    #plt.title('Alpha-beta pruning time decrease')
+    #plt.xlabel('# experiment')
+    #plt.ylabel('Time decrease, sec')
     plt.show()
