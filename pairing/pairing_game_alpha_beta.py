@@ -142,17 +142,19 @@ class PairingGameAlphaBeta(object):
                 if player_free:
                     self.set_def('A', player_i)
                     sc, pl = self.min(state, alpha, beta)
-                    if sc >= total_score:
+                    if sc > total_score:
                         total_score = sc
                         player_selected = player_i
                     self.release_def('A')
                         
-                    if total_score > beta:
+                    if total_score >= beta:
                         print('Beta cut off {} vs {}'.format(total_score, beta))
                         return total_score, player_selected
                     
-                    if total_score > alpha:
-                        alpha = total_score
+                    alpha = max(total_score, alpha)
+                    #if total_score > alpha:
+                        #alpha = total_score
+                        
                     #if total_score <= alpha:
                         #return total_score, player_selected
                     
@@ -167,17 +169,20 @@ class PairingGameAlphaBeta(object):
                         self.set_atackers('A', player_ii, player_jj, True)
                         
                         sc, pl = self.min(state, alpha, beta)
-                        if sc >= total_score:
+                        if sc > total_score:
                             total_score = sc
                             player_selected = [player_ii, player_jj]
                             
                         self.release_atackers('A', True)
                         
-                        if total_score > beta:
+                        if total_score >= beta:
+                            print('Beta cut off {} vs {}'.format(total_score, beta))
                             return total_score, player_selected
                     
-                        if total_score > alpha:
-                            alpha = total_score
+                        alpha = max(total_score, alpha)
+                        #if total_score > alpha:
+                            #alpha = total_score
+                            
                         #if total_score <= alpha:
                             #return total_score, player_selected
                     
@@ -192,20 +197,30 @@ class PairingGameAlphaBeta(object):
                 
                 sc, pl = self.min(state, alpha, beta)
                 
-                if sc >= total_score:
+                if sc > total_score:
                     total_score = sc
                     player_selected = i
                 
                 self.unchoose_atacker('B')
                 
-                if total_score > beta:
+                if total_score >= beta:
+                    print('Beta cut off {} vs {}'.format(total_score, beta))
                     return total_score, player_selected
                     
-                if total_score > alpha:
-                    alpha = total_score
+                alpha = max(total_score, alpha)
+                #if total_score > alpha:
+                    #alpha = total_score
+                    
                 #if total_score <= alpha:
                     #return total_score, player_selected
                 
+                #if total_score < beta:
+                    #beta = total_score
+                    
+                #if total_score <= alpha:
+                    #print('Alpha cut-off {} vs {}'.format(total_score, alpha))
+                    #return total_score, player_selected
+                    
                 #if total_score < beta:
                     #beta = total_score
         
@@ -222,18 +237,19 @@ class PairingGameAlphaBeta(object):
                     self.set_def('B', player_i)
                     sc, pl = self.max('atacks', alpha, beta)
                     
-                    if sc <= total_score:
+                    if sc < total_score:
                         player_selected = player_i
                         total_score = sc
                     
                     self.release_def('B')
                     
-                    if total_score < alpha:
+                    if total_score <= alpha:
                         print('Alpha cut-off {} vs {}'.format(total_score, alpha))
                         return total_score, player_selected
                     
-                    if total_score < beta:
-                        beta = total_score
+                    beta = min(beta, total_score)
+                    #if total_score < beta:
+                        #beta = total_score
                     
                     #if total_score >= beta:
                         #return total_score, player_selected
@@ -249,17 +265,20 @@ class PairingGameAlphaBeta(object):
                         self.set_atackers('B', player_ii, player_jj, True)
                         
                         sc, pl = self.max('chooseAtack', alpha, beta)
-                        if sc <= total_score:
+                        if sc < total_score:
                             total_score = sc
                             player_selected = [player_ii, player_jj]
                             
                         self.release_atackers('B', True)
                         
-                        if total_score < alpha:
+                        if total_score <= alpha:
+                            print('Alpha cut-off {} vs {}'.format(total_score, alpha))
                             return total_score, player_selected
                     
-                        if total_score < beta:
-                            beta = total_score
+                        beta = min(beta, total_score)
+                        #if total_score < beta:
+                            #beta = total_score
+                            
                         #if total_score >= beta:
                             #return total_score, player_selected
                     
@@ -279,11 +298,21 @@ class PairingGameAlphaBeta(object):
                     
                 self.unchoose_atacker('A')
                 
-                if total_score < alpha:
+                if total_score <= alpha:
+                    print('Alpha cut-off {} vs {}'.format(total_score, alpha))
                     return total_score, player_selected
+                  
+                beta = min(beta, total_score)
+                #if total_score < beta:
+                    #beta = total_score
+                
+                #if total_score >= beta:
+                    #print('Beta cut off {} vs {}'.format(total_score, beta))
+                    #return total_score, player_selected
                     
-                if total_score < beta:
-                    beta = total_score
+                #if total_score > alpha:
+                    #alpha = total_score
+                
                 #if total_score >= beta:
                     #return total_score, player_selected
                     
@@ -295,27 +324,35 @@ class PairingGameAlphaBeta(object):
         return total_score, player_selected
     
     def make_optimal_move(self, team, phase):
+        alpha_start = self.PT.min_team_score-1
+        beta_start = self.PT.max_team_score+1
         if phase == 'def':
             if team == 'A':
-                score, defender = self.max('def', self.PT.min_team_score-1, self.PT.max_team_score+1)
+                score, defender = self.max('def', alpha_start, beta_start)
             elif team == 'B':
-                score, defender = self.min('def', self.PT.min_team_score-1, self.PT.max_team_score+1)
+                score, defender = self.min('def', alpha_start, beta_start)
+            if defender is None:
+                raise ValueError('Selected player is None!')
             self.set_def(team, defender)
             print('TEAM {}: recomend to set defender {} for max score {}'.format(team, defender, score))
         elif phase == 'atacks':
             if team == 'A':
-                score, atackers = self.max('atacks', self.PT.min_team_score-1, self.PT.max_team_score+1)
+                score, atackers = self.max('atacks', alpha_start, beta_start)
             elif team == 'B':
-                score, atackers = self.min('atacks', self.PT.min_team_score-1, self.PT.max_team_score+1)
+                score, atackers = self.min('atacks', alpha_start, beta_start)
+            if atackers is None:
+                raise ValueError('Selected player is None!')
             self.set_atackers(team, atackers[0], atackers[1], True)
             print('TEAM {}: recomend to set atackers {} for max score {}'.format(team, atackers, score))
         elif phase == 'chooseAtack':
             if team == 'A':
-                score, choosed = self.max('chooseAtack', self.PT.min_team_score-1, self.PT.max_team_score+1)
+                score, choosed = self.max('chooseAtack', alpha_start, beta_start)
                 self.choose_atacker('B', choosed, None)
             elif team == 'B':
-                score, choosed = self.min('chooseAtack', self.PT.min_team_score-1, self.PT.max_team_score+1)
+                score, choosed = self.min('chooseAtack', alpha_start, beta_start)
                 self.choose_atacker('A', choosed, None)
+            if choosed is None:
+                raise ValueError('Selected player is None!')
             print('TEAM {}: recomend choose player {} from oppsite atackers, for score {}'.format(team, choosed, score))
         else:
             print('ERROR! unknown phase {}'.format(phase))
@@ -399,8 +436,11 @@ if __name__ == '__main__' :
     alpha_beta = []
     reg_time = []
     ab_time = []
+    #pt = PairingTable(np.random.randint(0,21,(4,4)), teamA_player_names = ['Starrok', 'Aberrat', 'Strohkopf', 'Servius'])
     for n in range(N):
-        pt = PairingTable(np.random.randint(0,21,(4,4)), teamA_player_names = ['Starrok', 'Aberrat', 'Strohkopf', 'Servius'])
+        #pt = PairingTable(np.random.randint(0,21,(4,4)), teamA_player_names = ['Starrok', 'Aberrat', 'Strohkopf', 'Servius'])
+        
+        pt = PairingTable(np.array([[1,9,20,2],[10,10,15,15],[6,13,0,3],[10,0,2,16]]))
         
         pg_r = PairingGame(pt)
         

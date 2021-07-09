@@ -228,12 +228,12 @@ class PairingGame8(object):
                 if free:
                     self.set_defender('A', stage, player)
                     score, _ = self.min(stage, phase, alpha, beta)
-                    if score >= max_score:
+                    if score > max_score:
                         max_score = score
                         move = player
                     self.unset_defender('A', stage)
                     
-                    if max_score > beta:
+                    if max_score >= beta:
                         #print('beta')
                         return max_score, move
                     
@@ -246,12 +246,12 @@ class PairingGame8(object):
                     if player1 > player2 and free1 and free2:
                         self.set_atackers('A', stage, player1, player2)
                         score, _ = self.min(stage, phase, alpha, beta)
-                        if score >= max_score:
+                        if score > max_score:
                             max_score = score
                             move = [player1, player2]
                         self.unset_atackers('A', stage)
                         
-                        if max_score > beta:
+                        if max_score >= beta:
                             #print('beta')
                             return max_score, move
                     
@@ -262,12 +262,12 @@ class PairingGame8(object):
             for choose in [0, 1]:
                 self.choose_atacker('B', stage, choose)#sure B
                 score, _ = self.min(stage, phase, alpha, beta)
-                if score >= max_score:
+                if score > max_score:
                     max_score = score
                     move = self.team['B']['{}_atackers'.format(stage)][choose]
                 self.unchoose_atacker('B', stage)
                 
-                if max_score > beta:
+                if max_score >= beta:
                     #print('beta')
                     return max_score, move
                     
@@ -290,12 +290,12 @@ class PairingGame8(object):
                 if free:
                     self.set_defender('B', stage, player)
                     score, _ = self.max(stage, 'ATACKERS', alpha, beta)
-                    if score <= min_score:
+                    if score < min_score:
                         min_score = score
                         move = player
                     self.unset_defender('B', stage)
                     
-                    if min_score < alpha:
+                    if min_score <= alpha:
                         #print('alpha')
                         return min_score, move
                     
@@ -308,12 +308,12 @@ class PairingGame8(object):
                     if player1 > player2 and free1 and free2:
                         self.set_atackers('B', stage, player1, player2)
                         score, _ = self.max(stage, 'CHOOSE', alpha, beta)
-                        if score <= min_score:
+                        if score < min_score:
                             min_score = score
                             move = [player1, player2]
                         self.unset_atackers('B', stage)
                         
-                        if min_score < alpha:
+                        if min_score <= alpha:
                             #print('alpha')
                             return min_score, move
                     
@@ -329,12 +329,12 @@ class PairingGame8(object):
                 else:
                     raise ValueError('Error in (min) stage can be only 1,2,3')
                     
-                if score <= min_score:
+                if score < min_score:
                     min_score = score
                     move = self.team['A']['{}_atackers'.format(stage)][choose]
                 self.unchoose_atacker('A', stage)
                 
-                if min_score < alpha:
+                if min_score <= alpha:
                     #print('alpha')
                     return min_score, move
                     
@@ -379,7 +379,7 @@ if __name__ == '__main__' :
     tock = time.time()
     pg8.play_optimal()
     tick = time.time()
-    print(tick-tock)
+    print("Elapsed time {} min".format((tick-tock)/60))
     
     #selA, selB = pg8.get_selected()
     
