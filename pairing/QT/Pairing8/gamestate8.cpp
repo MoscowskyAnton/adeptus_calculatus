@@ -1,0 +1,112 @@
+#include "gamestate8.h"
+#include <QRandomGenerator>
+
+GameState8::GameState8()
+{
+    reset();
+}
+
+void GameState8::reset(){
+    free = new bool[8];
+    for(int i = 0 ; i < 8; i++)
+        free[i] = true;
+    stages = new GameStage[3];
+    rejected_last_atacker =-1;
+    champion = -1;
+}
+
+void GameState8::set_defender(int stage, int player)
+{
+    free[player] = false;
+    stages[stage].defender = player;
+}
+
+void GameState8::unset_defender(int stage)
+{
+    free[stages[stage].defender] = true;
+    stages[stage].defender = -1;
+}
+
+void GameState8::set_atackers(int stage, int player1, int player2)
+{
+    free[player1] = false;
+    free[player2] = false;
+    stages[stage].atacker1 = player1;
+    stages[stage].atacker2 = player2;
+}
+
+void GameState8::unset_atackers(int stage)
+{
+    free[stages[stage].atacker1] = true;
+    free[stages[stage].atacker2] = true;
+    stages[stage].atacker1 = -1;
+    stages[stage].atacker2 = -1;
+}
+
+void GameState8::choose_atacker(int stage, int choosed_player)
+{
+    if( choosed_player == 0){
+        free[stages[stage].atacker1] = false;
+        free[stages[stage].atacker2] = true;
+
+        stages[stage].choosed_atacker = stages[stage].atacker1;
+        if(stage > 1){
+            rejected_last_atacker = stages[stage].atacker2;
+            free[rejected_last_atacker] = false;
+            // set champion
+            for( int i = 0 ; i < 8; i++){
+                if( free[i] ){
+                    free[i] = false;
+                    champion = i;
+                }
+            }
+        }
+    }
+    else{
+        free[stages[stage].atacker2] = false;
+        free[stages[stage].atacker1] = true;
+
+        stages[stage].choosed_atacker = stages[stage].atacker2;
+        if(stage > 1){
+            rejected_last_atacker = stages[stage].atacker1;
+            free[rejected_last_atacker] = false;
+            // set champion
+            for( int i = 0 ; i < 8; i++){
+                if( free[i] ){
+                    free[i] = false;
+                    champion = i;
+                }
+            }
+        }
+    }
+}
+
+void GameState8::unchoose_atacker(int stage){
+    free[stages[stage].choosed_atacker] = true;
+    stages[stage].choosed_atacker = -1;
+
+    if(stage > 1){
+        free[champion] = true;
+        free[rejected_last_atacker] = true;
+        champion = -1;
+        rejected_last_atacker =-1;
+    }
+}
+
+int GameState8::get_free_player(){
+    while(true){
+        int i = QRandomGenerator::global()->bounded(0,8);
+        if(free[i]){
+            return i;
+        }
+    }
+}
+
+void GameState8::get_pair_free_players(int *i, int *j){
+    while(true){
+        *i = QRandomGenerator::global()->bounded(0,8);
+        *j = QRandomGenerator::global()->bounded(0,8);
+        if( *i!=*j && free[*i] && free[*j])
+            break;
+    }
+}
