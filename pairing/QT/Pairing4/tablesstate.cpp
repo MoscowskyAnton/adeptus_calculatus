@@ -23,6 +23,10 @@ TablesState::TablesState(int* tables_types, int tables_types_num, int tables_num
     this->tables_types_num = tables_types_num;
     this->tables_number = tables_number;
     this->tables_types = tables_types;
+    tables_free = new bool[tables_number];
+    for( int i = 0 ; i < tables_number; i++){
+        tables_free[i] = true;
+    }
 }
 
 void TablesState::selectDefenderTable(char team, int table_id){

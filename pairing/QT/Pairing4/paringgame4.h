@@ -39,11 +39,11 @@ public:
 
     void reset();
 
-private:
     TablesState* TS;
     ScoreSheetTables* SS;
     GameState4 teamA;
     GameState4 teamB;
+private:
 };
 
 #endif // PARINGGAME4_H
