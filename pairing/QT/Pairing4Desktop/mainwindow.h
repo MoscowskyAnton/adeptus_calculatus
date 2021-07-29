@@ -101,6 +101,14 @@ private slots:
 
     void on_actionOpen_file_triggered();
 
+    void on_le_t1_textChanged(const QString &arg1);
+
+    void on_le_t2_textChanged(const QString &arg1);
+
+    void on_le_t3_textChanged(const QString &arg1);
+
+    void on_le_t4_textChanged(const QString &arg1);
+
 private:
     Ui::MainWindow *ui;
 
@@ -126,6 +134,9 @@ private:
 
     std::vector<QPushButton*> PB_finals;
 
+    std::vector<QLineEdit*> LE_tables;
+    std::vector<QLabel*> L_final_tables;
+
     void set_sb_scores_limits();
     void set_cb_tables_values();
 
@@ -141,12 +152,14 @@ private:
     void lock_B_choose(bool);
     void lock_B_defs_tables(bool);
     void lock_B_rej_tables(bool);
+    void lock_le_tables(bool);
 
     void clear_bp_defs(char team);
     void clear_bp_attacks(char team);
     void clear_bp_choose(char team);
     void clear_bp_def_tables(char team);
     void clear_bp_rej_tables(char team);
+
 
     ScoreSheetTables* SST;
     TablesState* TS;
@@ -185,6 +198,8 @@ private:
     std::vector<int> last_tables;
 
     void clear_finals();
+
+
 
 };
 #endif // MAINWINDOW_H

@@ -40,6 +40,15 @@ MainWindow::MainWindow(QWidget *parent)
 
     PB_finals = {ui->pb_final0, ui->pb_final1, ui->pb_final2, ui->pb_final3};
 
+    LE_tables = {ui->le_t1, ui->le_t2, ui->le_t3, ui->le_t4};
+
+    L_final_tables = {ui->l_final0, ui->l_final1, ui->l_final2, ui->l_final3};
+
+    int i=0;
+    for( QLineEdit* let: LE_tables){
+        let->setText(QString::number(++i));
+    }
+
     set_sb_scores_limits();
     set_cb_tables_values();
 
@@ -150,6 +159,8 @@ void MainWindow::on_pb_lock_clicked()
     lock_A_choose(false);
     lock_A_defs_tables(false);
     lock_A_rej_tables(false);
+
+    lock_le_tables(!lock_state);
 
     lock_B_defs(false);
     lock_B_attacks(false);
@@ -286,6 +297,12 @@ void MainWindow::lock_B_defs_tables(bool flag){
 void MainWindow::lock_B_rej_tables(bool flag){
     for(QPushButton* pb : PB_B_rej_tables){
         pb->setDisabled(!flag);
+    }
+}
+
+void MainWindow::lock_le_tables(bool flag){
+    for(QLineEdit* le : LE_tables){
+        le->setDisabled(!flag);
     }
 }
 
@@ -670,7 +687,8 @@ void MainWindow::calcADefTables(){
                     PG4->max(0,TABLE_REJ,alpha,beta,&score,&s1,&s2);
                 else
                     PG4->min(0,TABLE_REJ,alpha,beta,&score,&s1,&s2);
-            PB_A_def_tables[i]->setText("Table "+QString::number(i+1)+"\n"+QString::number(score));
+            //PB_A_def_tables[i]->setText("Table "+QString::number(i+1)+"\n"+QString::number(score));
+            PB_A_def_tables[i]->setText(L_final_tables[i]->text()+"\n"+QString::number(score));
             PG4->TS->unselectDefenderTable('A');
             if(score >= ms){
                 if(score > ms)
@@ -704,7 +722,8 @@ void MainWindow::calcBDefTables(){
             }
             else
                 PG4->max(0,TABLE_DEF,alpha,beta,&score,&s1,&s2);
-            PB_B_def_tables[i]->setText("Table "+QString::number(i+1)+"\n"+QString::number(score));
+            //PB_B_def_tables[i]->setText("Table "+QString::number(i+1)+"\n"+QString::number(score));
+            PB_B_def_tables[i]->setText(L_final_tables[i]->text()+"\n"+QString::number(score));
             PG4->TS->unselectDefenderTable('B');
             if(score <= ms){
                 if(score < ms)
@@ -812,7 +831,8 @@ void MainWindow::setRejectedTables(){
                 last_tables.push_back(i);
                 PG4->TS->selectRejectedTable(i);
                 score = PG4->get_score();
-                PB_A_rej_tables[tc]->setText("Table "+QString::number(i)+"\n"+QString::number(score));
+                //PB_A_rej_tables[tc]->setText("Table "+QString::number(i)+"\n"+QString::number(score));
+                PB_A_rej_tables[tc]->setText(L_final_tables[i]->text()+"\n"+QString::number(score));
                 PG4->TS->unselectRejectedTable();
                 if(score >= ms){
                     if(score > ms)
@@ -837,7 +857,8 @@ void MainWindow::setRejectedTables(){
                 last_tables.push_back(i);
                 PG4->TS->selectRejectedTable(i);
                 score = PG4->get_score();
-                PB_B_rej_tables[tc]->setText("Table "+QString::number(i)+"\n"+QString::number(score));
+                //PB_B_rej_tables[tc]->setText("Table "+QString::number(i)+"\n"+QString::number(score));
+                PB_B_rej_tables[tc]->setText(L_final_tables[i]->text()+"\n"+QString::number(score));
                 PG4->TS->unselectRejectedTable();
                 if(score <= ms){
                     if(score < ms)
@@ -971,3 +992,24 @@ void MainWindow::on_actionOpen_file_triggered()
         cntr++;
     }
 }
+
+void MainWindow::on_le_t1_textChanged(const QString &arg1)
+{
+    ui->l_final0->setText("Table "+arg1);
+}
+
+void MainWindow::on_le_t2_textChanged(const QString &arg1)
+{
+    ui->l_final1->setText("Table "+arg1);
+}
+
+void MainWindow::on_le_t3_textChanged(const QString &arg1)
+{
+    ui->l_final2->setText("Table "+arg1);
+}
+
+void MainWindow::on_le_t4_textChanged(const QString &arg1)
+{
+    ui->l_final3->setText("Table "+arg1);
+}
+
