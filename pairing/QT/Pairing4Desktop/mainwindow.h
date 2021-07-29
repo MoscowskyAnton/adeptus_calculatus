@@ -99,6 +99,8 @@ private slots:
 
     void on_cb_2nd_rolloff_stateChanged(int arg1);
 
+    void on_actionOpen_file_triggered();
+
 private:
     Ui::MainWindow *ui;
 
@@ -183,5 +185,6 @@ private:
     std::vector<int> last_tables;
 
     void clear_finals();
+
 };
 #endif // MAINWINDOW_H

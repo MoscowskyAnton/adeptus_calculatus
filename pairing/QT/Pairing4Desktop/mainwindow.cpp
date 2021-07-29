@@ -2,6 +2,8 @@
 #include "ui_mainwindow.h"
 #include <QRandomGenerator>
 #include <QMessageBox>
+#include <QFileDialog>
+#include <QRegularExpression>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -104,6 +106,7 @@ void MainWindow::on_actionFill_random_triggered()
     for( QComboBox* x: CB_tables){
         x->setCurrentIndex(QRandomGenerator::global()->bounded(0,TABLE_TYPES_NUM));
     }
+    ui->l_filename->setText("No file selected");
 
 }
 
@@ -923,5 +926,48 @@ void MainWindow::final(int rejected_table){
 void MainWindow::clear_finals(){
     for( QPushButton* x: PB_finals){
         x->setText("");
+    }
+}
+
+void MainWindow::on_actionOpen_file_triggered()
+{
+    QString fileName = QFileDialog::getOpenFileName(this, tr("Open Scores"), "", tr("Text Files (*.txt)"));
+    ui->l_filename->setText(fileName);
+    QFile file(fileName);
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)){
+        QMessageBox::warning(this,"File error","File cannon be opened");
+        return;
+    }
+    QTextStream in(&file);
+    int cntr =0;
+    QRegularExpression rx("(\\ |\\t)");
+    while (!in.atEnd()) {
+        QString line = in.readLine();
+        // player
+        if( cntr == 0 ){
+            QStringList names = line.split(rx);
+            for(int i = 0 ; i < PLAYERS_NUM; i++){
+                if( i < names.length())
+                    LE_Bnames[i]->setText(names[i]);
+            }
+        }
+        // faction
+        else if( cntr == 1){
+            QStringList names = line.split(rx);
+            for(int i = 0 ; i < PLAYERS_NUM; i++){
+                if( i < names.length())
+                    LE_Bfactions[i]->setText(names[i]);
+            }
+        }
+        else{
+            QStringList numbers = line.split(rx);
+            int i = (cntr-2) / 3;
+            int k = (cntr-2) - i * 3;
+            for(int j = 0 ; j < PLAYERS_NUM; j++){
+                //ui->l_debug->setText(QString::number(cntr-2)+"->"+QString::number(a)+" "+QString::number(b)+" "+QString::number(c));
+                SB_scores[i][j][k]->setValue(numbers[j].toInt());
+            }
+        }
+        cntr++;
     }
 }
