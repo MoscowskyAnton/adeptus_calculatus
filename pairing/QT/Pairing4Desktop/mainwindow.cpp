@@ -36,6 +36,8 @@ MainWindow::MainWindow(QWidget *parent)
     PB_B_def_tables = {ui->pb_Bdef_table0, ui->pb_Bdef_table1, ui->pb_Bdef_table2, ui->pb_Bdef_table3};
     PB_B_rej_tables = {ui->pb_Brej_table0, ui->pb_Brej_table1};
 
+    PB_finals = {ui->pb_final0, ui->pb_final1, ui->pb_final2, ui->pb_final3};
+
     set_sb_scores_limits();
     set_cb_tables_values();
 
@@ -108,7 +110,7 @@ void MainWindow::on_actionFill_random_triggered()
 
 void MainWindow::on_actionAbout_triggered()
 {
-    QMessageBox::about(this, "About", "Warhammer 40k pairing machine.\n Verson "+QString(VERSION)+".\n By Anton 'Strohkopf' Moscowsky.");
+    QMessageBox::about(this, "About", "Warhammer 40k pairing machine\n Verson "+QString(VERSION)+"\n By Anton 'Strohkopf' Moscowsky\nSource: https://github.com/MoscowskyAnton/adeptus_calculatus");
 }
 
 
@@ -170,6 +172,9 @@ void MainWindow::on_pb_lock_clicked()
         clear_bp_rej_tables('B');
         A_atackers.clear();
         B_atackers.clear();
+        last_tables.clear();
+        ui->le_final_score->setText("");
+        clear_finals();
     }
 
     ui->pb_lock->setDisabled(false);
@@ -653,15 +658,15 @@ void MainWindow::calcADefTables(){
     int beta = SST->max_team_score;
     int ms=PG4->SS->min_team_score, mi=0;
     for( int i = 0 ; i < PLAYERS_NUM; i++){
-        if(PG4->TS->tables_free[i]){
+        if(PG4->TS->tables_free[i]){            
             PG4->TS->selectDefenderTable('A',i);
             if(PG4->TS->teamA_won_1_rolloff)
                 PG4->min(0,TABLE_DEF,alpha,beta,&score,&s1,&s2);
             else
                 if(PG4->TS->teamA_won_2_rolloff)
-                    PG4->min(0,TABLE_REJ,alpha,beta,&score,&s1,&s2);
-                else
                     PG4->max(0,TABLE_REJ,alpha,beta,&score,&s1,&s2);
+                else
+                    PG4->min(0,TABLE_REJ,alpha,beta,&score,&s1,&s2);
             PB_A_def_tables[i]->setText("Table "+QString::number(i+1)+"\n"+QString::number(score));
             PG4->TS->unselectDefenderTable('A');
             if(score >= ms){
@@ -685,16 +690,14 @@ void MainWindow::calcBDefTables(){
     int alpha = SST->min_team_score;
     int beta = SST->max_team_score;
     int ms=PG4->SS->max_team_score, mi=0;
-    if( PG4->TS->teamA_won_1_rolloff)
-        ms=PG4->SS->min_team_score;
     for( int i = 0 ; i < PLAYERS_NUM; i++){
-        if(PG4->TS->tables_free[i]){
+        if(PG4->TS->tables_free[i]){            
             PG4->TS->selectDefenderTable('B',i);
             if(PG4->TS->teamA_won_1_rolloff){
                 if(PG4->TS->teamA_won_2_rolloff)
-                    PG4->min(0,TABLE_REJ,alpha,beta,&score,&s1,&s2);
-                else
                     PG4->max(0,TABLE_REJ,alpha,beta,&score,&s1,&s2);
+                else
+                    PG4->min(0,TABLE_REJ,alpha,beta,&score,&s1,&s2);
             }
             else
                 PG4->max(0,TABLE_DEF,alpha,beta,&score,&s1,&s2);
@@ -752,6 +755,7 @@ void MainWindow::setADefTables(int table){
         ui->cb_2nd_rolloff->setDisabled(false);
         second_roll_off_checkable = true;
     }
+    lock_A_defs_tables(false);
 }
 
 void MainWindow::setBDefTables(int table){
@@ -766,6 +770,7 @@ void MainWindow::setBDefTables(int table){
         lock_A_defs_tables(true);
         calcADefTables();
     }
+    lock_B_defs_tables(false);
 }
 
 void MainWindow::on_pb_Adef_table0_clicked()
@@ -801,6 +806,7 @@ void MainWindow::setRejectedTables(){
         int tc = 0;
         for( int i = 0 ; i < PLAYERS_NUM; i++){
             if(PG4->TS->tables_free[i]){
+                last_tables.push_back(i);
                 PG4->TS->selectRejectedTable(i);
                 score = PG4->get_score();
                 PB_A_rej_tables[tc]->setText("Table "+QString::number(i)+"\n"+QString::number(score));
@@ -825,6 +831,7 @@ void MainWindow::setRejectedTables(){
         int tc = 0;
         for( int i = 0 ; i < PLAYERS_NUM; i++){
             if(PG4->TS->tables_free[i]){
+                last_tables.push_back(i);
                 PG4->TS->selectRejectedTable(i);
                 score = PG4->get_score();
                 PB_B_rej_tables[tc]->setText("Table "+QString::number(i)+"\n"+QString::number(score));
@@ -845,22 +852,26 @@ void MainWindow::setRejectedTables(){
 
 void MainWindow::on_pb_Arej_table0_clicked()
 {
-
+    set_pb_font(ui->pb_Arej_table0,"italic");
+    final(last_tables[0]);
 }
 
 void MainWindow::on_pb_Arej_table1_clicked()
 {
-
+    set_pb_font(ui->pb_Arej_table1,"italic");
+    final(last_tables[1]);
 }
 
 void MainWindow::on_pb_Brej_table0_clicked()
 {
-
+    set_pb_font(ui->pb_Brej_table0,"italic");
+    final(last_tables[0]);
 }
 
 void MainWindow::on_pb_Brej_table1_clicked()
 {
-
+    set_pb_font(ui->pb_Brej_table1,"italic");
+    final(last_tables[1]);
 }
 
 void MainWindow::on_cb_2nd_rolloff_stateChanged(int arg1)
@@ -871,3 +882,46 @@ void MainWindow::on_cb_2nd_rolloff_stateChanged(int arg1)
     }
 }
 
+void MainWindow::final(int rejected_table){
+    ui->cb_2nd_rolloff->setDisabled(true);
+    second_roll_off_checkable = false;
+    lock_A_rej_tables(false);
+    lock_B_rej_tables(false);
+    PG4->TS->selectRejectedTable(rejected_table);
+    int score = PG4->get_score();
+    ui->le_final_score->setText(QString::number(score));
+
+    int Aid, Bid;
+    for( int i = 0 ; i < PLAYERS_NUM; i++){
+        if( i == PG4->TS->teamAdefenderTable){
+            Aid = PG4->teamA.stages[0].defender;
+            Bid = PG4->teamB.stages[0].choosed_atacker;
+        }
+        else if(i == PG4->TS->teamBdefenderTable){
+            Bid = PG4->teamB.stages[0].defender;
+            Aid = PG4->teamA.stages[0].choosed_atacker;
+        }
+        else if(i == PG4->TS->rejectedPlayersTable){
+            Aid = PG4->teamA.rejected_last_atacker;
+            Bid = PG4->teamB.rejected_last_atacker;
+        }
+        else if(i == PG4->TS->championsPlayersTable){
+            Aid = PG4->teamA.champion;
+            Bid = PG4->teamB.champion;
+        }
+        else{
+            //crap!
+        }
+        score = PG4->SS->ind(Aid, Bid, PG4->TS->tables_types[i]);
+        QString playerA = LE_Anames[Aid]->text() == "" ? "A Player "+QString::number(Aid) : LE_Anames[Aid]->text();
+        QString playerB = LE_Bnames[Bid]->text() == "" ? "B Player "+QString::number(Bid) : LE_Bnames[Bid]->text();
+
+        PB_finals[i]->setText(playerA+"\nvs\n"+playerB+"\n"+QString::number(score));
+    }
+}
+
+void MainWindow::clear_finals(){
+    for( QPushButton* x: PB_finals){
+        x->setText("");
+    }
+}

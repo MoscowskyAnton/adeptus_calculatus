@@ -122,6 +122,8 @@ private:
     std::vector<QPushButton*> PB_B_def_tables;
     std::vector<QPushButton*> PB_B_rej_tables;
 
+    std::vector<QPushButton*> PB_finals;
+
     void set_sb_scores_limits();
     void set_cb_tables_values();
 
@@ -176,5 +178,10 @@ private:
     void setRejectedTables();
 
     bool second_roll_off_checkable = false;
+
+    void final(int rejected_table);
+    std::vector<int> last_tables;
+
+    void clear_finals();
 };
 #endif // MAINWINDOW_H
