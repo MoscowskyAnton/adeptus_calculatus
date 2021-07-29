@@ -1,4 +1,4 @@
-# Pairing machies
+# Pairing machines
 Here are links to archives with pairing machines binaries.
 
 ## Pairing machine 4x4
