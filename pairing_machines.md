@@ -1,5 +1,5 @@
 # Pairing machies
-Here is links to archives with binaries for pairing machines.
+Here are links to archives with pairing machines binaries.
 
 ## Pairing machine 4x4
 
