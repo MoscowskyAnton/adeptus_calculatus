@@ -1,2 +1,3 @@
 *.pyc
 pairing/QT/build*
+*bin/

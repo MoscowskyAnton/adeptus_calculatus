@@ -31,3 +31,8 @@ qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
+DESTDIR   = $$PWD/bin
+
+build_pass:CONFIG(release, debug|release){
+    QMAKE_POST_LINK += windeployqt --release --compiler-runtime $$DESTDIR/Pairing4Desktop.exe
+}
