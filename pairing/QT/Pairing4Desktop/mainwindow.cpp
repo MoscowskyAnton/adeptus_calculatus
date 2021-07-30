@@ -154,6 +154,7 @@ void MainWindow::on_pb_lock_clicked()
     ui->cb_2nd_rolloff->setChecked(false);
 
     ui->actionFill_random->setDisabled(lock_state);
+    ui->actionOpen_file->setDisabled(lock_state);
 
     lock_A_attacks(false);
     lock_A_choose(false);
