@@ -650,7 +650,7 @@ void MainWindow::setAchoose(int ch){
 
 void MainWindow::on_pb_Bchoose0_clicked()
 {
-    set_pb_font(ui->pb_Bchoose1, "italic");
+    set_pb_font(ui->pb_Bchoose0, "italic");
     setBchoose(0);
 }
 
