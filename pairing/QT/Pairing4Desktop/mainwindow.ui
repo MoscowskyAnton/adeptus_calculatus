@@ -32,7 +32,7 @@
       <property name="title">
        <string>Tables</string>
       </property>
-      <widget class="QWidget" name="">
+      <widget class="QWidget" name="layoutWidget">
        <property name="geometry">
         <rect>
          <x>10</x>
@@ -205,7 +205,7 @@
             <item>
              <widget class="QLabel" name="label_12">
               <property name="text">
-               <string>Atackers</string>
+               <string>Attackers</string>
               </property>
              </widget>
             </item>
@@ -510,7 +510,7 @@
             <item>
              <widget class="QLabel" name="label_29">
               <property name="text">
-               <string>Atackers</string>
+               <string>Attackers</string>
               </property>
              </widget>
             </item>
@@ -1526,6 +1526,12 @@
           <widget class="QLineEdit" name="le_final_score">
            <property name="enabled">
             <bool>false</bool>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>50</width>
+             <height>16777215</height>
+            </size>
            </property>
           </widget>
          </item>

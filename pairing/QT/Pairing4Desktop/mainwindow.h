@@ -16,7 +16,7 @@ QT_END_NAMESPACE
 enum TABLE_TYPES{ OPEN = 0, MIDDLE, CLOSED };
 #define TABLE_TYPES_NUM 3
 #define PLAYERS_NUM 4
-#define VERSION "1.0.0"
+#define VERSION "1.0.1"
 
 class MainWindow : public QMainWindow
 {
