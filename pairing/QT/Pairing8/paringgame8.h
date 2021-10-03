@@ -1,15 +1,17 @@
 #ifndef PARINGGAME8_H
 #define PARINGGAME8_H
-#include "scoresheet.h"
+//#include "scoresheet.h"
+#include "scoresheettables.h"
+#include "tablesstate.h"
 #include "gamestate8.h"
 
 enum STAGES{ FIRST, SECOND, THRID};
-enum PHASES{ DEFENDER, ATACKERS, CHOOSE};
+enum PHASES{ DEFENDER, ATACKERS, CHOOSE, TABLE_CHOOSE};
 
 class ParingGame8
 {
 public:
-    ParingGame8(ScoreSheet*);
+    ParingGame8(ScoreSheetTables*, TablesState*);
 
     int get_score();
     void print_results();
@@ -29,11 +31,13 @@ public:
     int input_defender(GameState8* team);
     void input_atakers(GameState8* team, int*a1, int*a2);
     int input_choose(GameState8* team, int stage);
+    int input_table();
 
     void reset();
 
 private:
-    ScoreSheet* SS;
+    ScoreSheetTables* SS;
+    TablesState* TS;
     GameState8 teamA;
     GameState8 teamB;
 };
