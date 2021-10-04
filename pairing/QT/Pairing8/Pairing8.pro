@@ -11,7 +11,9 @@ SOURCES += \
         gamestate8.cpp \
         main.cpp \
         paringgame8.cpp \
-        scoresheet.cpp
+        scoresheet.cpp \
+        scoresheettables.cpp \
+        tablesstate.cpp
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
@@ -21,4 +23,6 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 HEADERS += \
     gamestate8.h \
     paringgame8.h \
-    scoresheet.h
+    scoresheet.h \
+    scoresheettables.h \
+    tablesstate.h

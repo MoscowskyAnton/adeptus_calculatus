@@ -1,7 +1,8 @@
 #include <QCoreApplication>
-#include "scoresheet.h"
+#include "scoresheettables.h"
 #include "paringgame8.h"
 #include "stdio.h"
+#include "tablesstate.h"
 
 int main(int argc, char *argv[])
 {
@@ -21,14 +22,22 @@ int main(int argc, char *argv[])
     for( int i = 0 ; i < 8 ; i++)
         sheet[i] = scores[i];
 
-    ScoreSheet ss(sheet, 8, -2, 2);
-    //ScoreSheet ss(8, -2, 2);
+    ScoreSheetTables ss(8, 3, -2, 2);
+
     ss.print();
     printf("Mean %f\n",ss.mean());
 
-    ParingGame8 pg(&ss);
+    TablesState ts(3, 8, true, false);
+    ts.print();
+
+    ParingGame8 pg(&ss, &ts);
+
+    int score, alpha = ss.min_team_score, beta = ss.max_team_score, s1, s2;
+    pg.max(DEFENDER, FIRST, alpha, beta, &score, &s1, &s2);
+    printf("Score = %i", score);
     //pg.play_random();
-    pg.play_with_input();
+    //pg.play_with_input();
+
 
     /*
     pg.play_optimal();

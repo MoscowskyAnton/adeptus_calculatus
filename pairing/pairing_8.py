@@ -357,16 +357,16 @@ class PairingGame8(object):
         if phase == 'DEFENDER':
             self.set_defender(team, stage, player)
             if verbose:
-                print('TEAM{}: recomended {} defender: #{}'.format(team, stage, player))
+                print('TEAM {}: recomended {} defender: #{}'.format(team, stage, player))
         elif phase == 'ATACKERS':
             self.set_atackers(team, stage, player[0], player[1])
             if verbose:
-                print('TEAM{}: recomended {} attackers: #{}'.format(team, stage, player))
+                print('TEAM {}: recomended {} attackers: #{}'.format(team, stage, player))
         elif phase == 'CHOOSE':
             self.choose_atacker(team, stage, player)
             player_no = self.team[team]['{}_atackers'.format(stage)][choose]
             if verbose:
-                print('TEAM{}: recomended {} defender: #{}'.format(team, stage, player_no))
+                print('TEAM {}: recomended {} defender: #{}'.format(team, stage, player_no))
         else:
             raise ValueError('Error in (make_optimal_move) unknown phase {}'.format(phase))
         return score, player

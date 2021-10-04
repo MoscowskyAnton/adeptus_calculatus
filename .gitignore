@@ -1,3 +1,4 @@
 *.pyc
 pairing/QT/build*
 *bin/
+*pro.user.*

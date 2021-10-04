@@ -2,9 +2,12 @@
 #include "stdio.h"
 #include <QRandomGenerator>
 
-ParingGame8::ParingGame8(ScoreSheet* ss)
+//#define DEBUG_STEPS
+
+ParingGame8::ParingGame8(ScoreSheetTables* ss, TablesState* ts)
 {
     SS = ss;
+    TS = ts;
 }
 
 void ParingGame8::reset(){
@@ -15,11 +18,11 @@ void ParingGame8::reset(){
 int ParingGame8::get_score(){
     int score = 0;
     for( int i = 0 ; i < 3; i++){
-        score += SS->ind(teamA.stages[i].defender, teamB.stages[i].choosed_atacker);
-        score += SS->ind(teamA.stages[i].choosed_atacker, teamB.stages[i].defender);
+        score += SS->ind(teamA.stages[i].defender, teamB.stages[i].choosed_atacker, TS->teamAdefenderTable[i]);
+        score += SS->ind(teamA.stages[i].choosed_atacker, teamB.stages[i].defender, TS->teamBdefenderTable[i]);
     }
-    score += SS->ind(teamA.rejected_last_atacker, teamB.rejected_last_atacker);
-    score += SS->ind(teamA.champion, teamB.champion);
+    score += SS->ind(teamA.rejected_last_atacker, teamB.rejected_last_atacker, TS->rejectedPlayersTable);
+    score += SS->ind(teamA.champion, teamB.champion, TS->championsPlayersTable);
     return score;
 }
 
@@ -28,11 +31,11 @@ void ParingGame8::print_results(){
     printf("teamA: %i teamB: %i\n", tsc, (SS->max_team_score + SS->min_team_score) - tsc);
 
     for(int i = 0 ; i < 3; i++){
-        printf("A(%i)def vs B(%i)at = %i\n",teamA.stages[i].defender, teamB.stages[i].choosed_atacker, SS->ind(teamA.stages[i].defender, teamB.stages[i].choosed_atacker));
-        printf("A(%i)at vs B(%i)def = %i\n",teamA.stages[i].choosed_atacker, teamB.stages[i].defender, SS->ind(teamA.stages[i].choosed_atacker, teamB.stages[i].defender));
+        printf("A(%i)def vs B(%i)at = %i\n",teamA.stages[i].defender, teamB.stages[i].choosed_atacker, SS->ind(teamA.stages[i].defender, teamB.stages[i].choosed_atacker, TS->teamAdefenderTable[i]));
+        printf("A(%i)at vs B(%i)def = %i\n",teamA.stages[i].choosed_atacker, teamB.stages[i].defender, SS->ind(teamA.stages[i].choosed_atacker, teamB.stages[i].defender, TS->teamBdefenderTable[i]));
     }
-    printf("A(%i)rej vs B(%i)rej = %i\n",teamA.rejected_last_atacker, teamB.rejected_last_atacker, SS->ind(teamA.rejected_last_atacker, teamB.rejected_last_atacker));
-    printf("A(%i)champ vs B(%i)champ = %i\n",teamA.champion, teamB.champion, SS->ind(teamA.champion, teamB.champion));
+    printf("A(%i)rej vs B(%i)rej = %i\n",teamA.rejected_last_atacker, teamB.rejected_last_atacker, SS->ind(teamA.rejected_last_atacker, teamB.rejected_last_atacker, TS->rejectedPlayersTable));
+    printf("A(%i)champ vs B(%i)champ = %i\n",teamA.champion, teamB.champion, SS->ind(teamA.champion, teamB.champion, TS->championsPlayersTable));
 }
 
 void ParingGame8::make_random_move(char team_name, int stage, int phase){
@@ -77,14 +80,17 @@ void ParingGame8::play_random(){
     }
 }
 
+//
+// MAX
+//
 void ParingGame8::max(int stage, int phase, int alpha, int beta, int *score, int *selected_player1, int *selected_player2){
     *score = SS->min_team_score;
 
     if(phase == DEFENDER){
         for(int i = 0 ; i < 8; i++){
-//            if( stage == FIRST){
-//                printf("Calculating defender %i for team A\n",i);
-//            }
+            if( stage == FIRST){
+              printf("Calculating defender %i for team A on stage %i\n",i,stage);
+            }
             if(teamA.free[i]){
                 teamA.set_defender(stage, i);
                 int new_score, s1, s2;
@@ -144,19 +150,74 @@ void ParingGame8::max(int stage, int phase, int alpha, int beta, int *score, int
             }
         }
     }
+    else if(phase == TABLE_CHOOSE){
+        if( stage < 3){
+            //for(int i = 0 ; i < TS->tables_number; i++){
+            for( size_t i = 0 ; i < TS->count_table_types.size(); i++ ){
+                if( TS->count_table_types[i] > 0 ){
+                    TS->selectDefenderTable('A', i, stage);
+
+                    int new_score, s1, s2;
+                    if( stage == 2 && !TS->teamA_won_1_rolloff){
+                        max(TS->teamA_won_1_rolloff ? stage : stage+1, phase, alpha, beta, &new_score, &s1, &s2);
+                    }
+                    else
+                        min(TS->teamA_won_1_rolloff ? stage : stage+1, phase, alpha, beta, &new_score, &s1, &s2);
+                    if( new_score > *score){
+                        *score = new_score;
+                        *selected_player1 = i;
+                    }
+                    TS->unselectDefenderTable('A', stage);
+                    if(*score >= beta){
+                        break;
+                    }
+                    if(*score > alpha){
+                        alpha = *score;
+                    }
+                }
+            }
+        }
+        // last choose
+        else{
+            for( size_t i = 0 ; i < TS->count_table_types.size(); i++ ){
+                if( TS->count_table_types[i] > 0 ){
+                    TS->selectRejectedTable(i);
+                    int new_score;
+                    new_score = get_score();
+                    if( new_score > *score){
+                        *score = new_score;
+                        *selected_player1 = i;
+                    }
+                    TS->unselectRejectedTable();
+                    if(*score >= beta){
+                        break;
+                    }
+                    if(*score > alpha){
+                        alpha = *score;
+                    }
+#ifdef DEBUG_STEPS
+                    printf("A END!\n");
+#endif
+                }
+            }
+        }
+    }
     else{
         printf("ERROR! Unknown phase %i",phase);
     }
 }
 
+//
+// MIN
+//
 void ParingGame8::min(int stage, int phase, int alpha, int beta, int *score, int *selected_player1, int *selected_player2){
     *score = SS->max_team_score;
 
     if(phase == DEFENDER){
         for(int i = 0 ; i < 8; i++){
-//            if( stage == FIRST){
-//                printf("\tCalculating defender %i for team B\n",i);
-//            }
+            if( stage == FIRST){
+                printf("\tCalculating defender %i for team B on stage %i\n",i,stage);
+            }
             if(teamB.free[i]){
                 teamB.set_defender(stage, i);
                 int new_score, s1, s2;
@@ -202,8 +263,15 @@ void ParingGame8::min(int stage, int phase, int alpha, int beta, int *score, int
         for(int i = 0; i < 2; i++){
             teamA.choose_atacker(stage, i);
             int new_score, s1, s2;
-            if(stage > 1)
-                new_score = get_score();
+            if(stage == THRID ){
+                //new_score = get_score();
+                if( TS->teamA_won_1_rolloff ){
+                    max(0, TABLE_CHOOSE, alpha, beta, &new_score, &s1, &s2);
+                }
+                else{
+                    min(0, TABLE_CHOOSE, alpha, beta, &new_score, &s1, &s2);
+                }
+            }
             else
                 max(stage+1, DEFENDER, alpha, beta, &new_score, &s1, &s2);
             if( new_score < *score){
@@ -216,6 +284,58 @@ void ParingGame8::min(int stage, int phase, int alpha, int beta, int *score, int
             }
             if(*score < beta){
                 beta = *score;
+            }
+        }
+    }
+    else if(phase == TABLE_CHOOSE){
+        //printf("stage %i\n",stage);
+        if( stage < 3){
+            for( size_t i = 0 ; i < TS->count_table_types.size(); i++ ){
+                if( TS->count_table_types[i] > 0 ){
+                    TS->selectDefenderTable('B', i, stage);
+                    int new_score, s1, s2;
+                    if( stage == 2 && TS->teamA_won_1_rolloff){
+                        min(TS->teamA_won_1_rolloff ? stage+1 : stage, phase, alpha, beta, &new_score, &s1, &s2);
+                    }
+                    else
+                        max(TS->teamA_won_1_rolloff ? stage+1 : stage, phase, alpha, beta, &new_score, &s1, &s2);
+                    if( new_score < *score){
+                        *score = new_score;
+                        *selected_player1 = i;
+                    }
+                    TS->unselectDefenderTable('B', stage);
+                    if(*score <= alpha){
+                        break;
+                    }
+                    if(*score < beta){
+                        beta = *score;
+                    }
+                }
+            }
+        }
+        // last choose
+        else{
+            for( size_t i = 0 ; i < TS->count_table_types.size(); i++ ){
+                if( TS->count_table_types[i] > 0 ){
+                    TS->selectRejectedTable(i);
+                    int new_score;
+                    new_score = get_score();
+                    if( new_score < *score){
+                        *score = new_score;
+                        *selected_player1 = i;
+                    }
+                    TS->unselectRejectedTable();
+                    if(*score <= alpha){
+                        break;
+                    }
+                    if(*score < beta){
+                        beta = *score;
+                    }
+#ifdef DEBUG_STEPS
+                    printf("B END!\n");
+#endif
+                }
+
             }
         }
     }
@@ -354,7 +474,23 @@ int ParingGame8::input_choose(GameState8* team, int stage){
             return choose;
         }
     }
+}
 
+int ParingGame8::input_table(){
+    int table;
+    while(true){
+        printf("\n\tChoose table for player");
+        scanf("%i", &table);
+        if( table >= TS->tables_number){
+            printf("Table must be from 0 - %i!", TS->tables_number-1);
+        }
+        if( TS->tables_free[table]){
+            return table;
+        }
+        else{
+            printf("This table taken already!");
+        }
+    }
 }
 
 void ParingGame8::play_with_input(){
