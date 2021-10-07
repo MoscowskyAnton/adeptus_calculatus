@@ -35,11 +35,14 @@ public:
 
     void reset();
 
-private:
-    ScoreSheetTables* SS;
-    TablesState* TS;
     GameState8 teamA;
     GameState8 teamB;
+
+    ScoreSheetTables* SS;
+    TablesState* TS;
+private:
+
+
 };
 
 #endif // PARINGGAME8_H
