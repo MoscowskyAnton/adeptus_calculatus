@@ -3,7 +3,6 @@
 #include <QRandomGenerator>
 #include <QMessageBox>
 #include <QFileDialog>
-#include <QRegularExpression>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
