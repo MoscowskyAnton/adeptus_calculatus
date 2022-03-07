@@ -6,7 +6,7 @@
 
 int main(int argc, char *argv[])
 {
-    QCoreApplication a(argc, argv);
+    //QCoreApplication a(argc, argv);
 
 
     int scores[8][8] = {{1,0,-2,-1,0,0,2,2},
@@ -31,9 +31,10 @@ int main(int argc, char *argv[])
     ts.print();
 
     ParingGame8 pg(&ss, &ts);
+    pg.teamA.set_defender(FIRST, 0);
 
     int score, alpha = ss.min_team_score, beta = ss.max_team_score, s1, s2;
-    pg.max(DEFENDER, FIRST, alpha, beta, &score, &s1, &s2);
+    pg.min(DEFENDER, FIRST, alpha, beta, &score, &s1, &s2);
     printf("Score = %i", score);
     //pg.play_random();
     //pg.play_with_input();
@@ -60,5 +61,5 @@ int main(int argc, char *argv[])
         printf("%i ",random_scores[i]);
     }
 */
-    return a.exec();
+    return 0;//a.exec();
 }

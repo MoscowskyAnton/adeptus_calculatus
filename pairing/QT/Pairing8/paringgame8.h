@@ -13,6 +13,8 @@ class ParingGame8
 public:
     ParingGame8(ScoreSheetTables*, TablesState*);
 
+    //~ParingGame8(ParingGame8 &&) = default;
+
     int get_score();
     void print_results();
 
@@ -35,11 +37,13 @@ public:
 
     void reset();
 
+    GameState8 teamA;
+    GameState8 teamB;
+
 private:
     ScoreSheetTables* SS;
     TablesState* TS;
-    GameState8 teamA;
-    GameState8 teamB;
+
 };
 
 #endif // PARINGGAME8_H
