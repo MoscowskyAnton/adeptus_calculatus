@@ -40,6 +40,8 @@ public:
     GameState8 teamA;
     GameState8 teamB;
 
+    int* global_alpha;
+
 private:
     ScoreSheetTables* SS;
     TablesState* TS;

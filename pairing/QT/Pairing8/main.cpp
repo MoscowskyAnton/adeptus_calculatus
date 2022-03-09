@@ -3,6 +3,9 @@
 #include "paringgame8.h"
 #include "stdio.h"
 #include "tablesstate.h"
+#include <chrono>
+#include <iostream>
+
 
 int main(int argc, char *argv[])
 {
@@ -31,10 +34,13 @@ int main(int argc, char *argv[])
     ts.print();
 
     ParingGame8 pg(&ss, &ts);
-    pg.teamA.set_defender(FIRST, 0);
+    //pg.teamA.set_defender(FIRST, 0);
 
     int score, alpha = ss.min_team_score, beta = ss.max_team_score, s1, s2;
-    pg.min(DEFENDER, FIRST, alpha, beta, &score, &s1, &s2);
+    std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
+    pg.max(DEFENDER, FIRST, alpha, beta, &score, &s1, &s2);
+    std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+    std::cout << "Time difference = " << std::chrono::duration_cast<std::chrono::minutes>(end - begin).count() << "[min]" << std::endl;
     printf("Score = %i", score);
     //pg.play_random();
     //pg.play_with_input();

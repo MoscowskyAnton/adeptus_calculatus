@@ -105,7 +105,7 @@ void ParingGame8::max(int stage, int phase, int alpha, int beta, int *score, int
                 }
                 if(*score > alpha){
                     alpha = *score;
-                }
+                }                
             }
         }
     }
@@ -230,6 +230,8 @@ void ParingGame8::min(int stage, int phase, int alpha, int beta, int *score, int
                 if(*score <= alpha){
                     break;
                 }
+                if(*score <= *global_alpha)
+                    break;
                 if(*score < beta){
                     beta = *score;
                 }
@@ -252,6 +254,8 @@ void ParingGame8::min(int stage, int phase, int alpha, int beta, int *score, int
                     if(*score <= alpha){
                         break;
                     }
+                    if(*score <= *global_alpha)
+                        break;
                     if(*score < beta){
                         beta = *score;
                     }
@@ -282,6 +286,8 @@ void ParingGame8::min(int stage, int phase, int alpha, int beta, int *score, int
             if(*score <= alpha){
                 break;
             }
+            if(*score <= *global_alpha)
+                break;
             if(*score < beta){
                 beta = *score;
             }
@@ -307,6 +313,8 @@ void ParingGame8::min(int stage, int phase, int alpha, int beta, int *score, int
                     if(*score <= alpha){
                         break;
                     }
+                    if(*score <= *global_alpha)
+                        break;
                     if(*score < beta){
                         beta = *score;
                     }
@@ -328,6 +336,8 @@ void ParingGame8::min(int stage, int phase, int alpha, int beta, int *score, int
                     if(*score <= alpha){
                         break;
                     }
+                    if(*score <= *global_alpha)
+                        break;
                     if(*score < beta){
                         beta = *score;
                     }
