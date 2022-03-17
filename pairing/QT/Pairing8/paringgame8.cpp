@@ -88,9 +88,9 @@ void ParingGame8::max(int stage, int phase, int alpha, int beta, int *score, int
 
     if(phase == DEFENDER){
         for(int i = 0 ; i < 8; i++){
-            if( stage == FIRST){
-              printf("Calculating defender %i for team A on stage %i\n",i,stage);
-            }
+//            if( stage == FIRST){
+//              printf("Calculating defender %i for team A on stage %i\n",i,stage);
+//            }
             if(teamA.free[i]){
                 teamA.set_defender(stage, i);
                 int new_score, s1, s2;
@@ -215,9 +215,9 @@ void ParingGame8::min(int stage, int phase, int alpha, int beta, int *score, int
 
     if(phase == DEFENDER){
         for(int i = 0 ; i < 8; i++){
-            if( stage == FIRST){
-                printf("\tCalculating defender %i for team B on stage %i\n",i,stage);
-            }
+//            if( stage == FIRST){
+//                printf("\tCalculating defender %i for team B on stage %i\n",i,stage);
+//            }
             if(teamB.free[i]){
                 teamB.set_defender(stage, i);
                 int new_score, s1, s2;
@@ -421,7 +421,7 @@ int ParingGame8::input_defender(GameState8* team){
     while(true){
        scanf("%i",&defender);
        if(defender >= SS->players){
-           printf("Player number must be 0-%i",SS->players);
+           printf("Player number must be 0-%i!",SS->players-1);
        }
        else{
            if(team->free[defender]){
@@ -431,6 +431,7 @@ int ParingGame8::input_defender(GameState8* team){
                printf("This player already taken!");
            }
        }
+       printf("\n\tReselect defender: ");
     }
 }
 
@@ -439,7 +440,7 @@ void ParingGame8::input_atakers(GameState8* team, int*a1, int*a2){
     while(true){
         scanf("%i",a1);
         if(*a1 >= SS->players){
-            printf("Player number must be 0-%i",SS->players);
+            printf("Player number must be 0-%i",SS->players-1);
         }
         else{
             if(team->free[*a1]){
@@ -449,12 +450,13 @@ void ParingGame8::input_atakers(GameState8* team, int*a1, int*a2){
                 printf("This player already taken!");
             }
         }
+        printf("\n\tReselect atacker 1: ");
     }
     printf("\n\tSelect atacker 2: ");
     while(true){
         scanf("%i",a2);
         if(*a2 >= SS->players){
-            printf("Player number must be 0-%i",SS->players);
+            printf("Player number must be 0-%i",SS->players-1);
         }
         else{
             if(*a1 != *a2){
@@ -469,6 +471,7 @@ void ParingGame8::input_atakers(GameState8* team, int*a1, int*a2){
                 printf("Can't select the same player, you dumb!");
             }
         }
+        printf("\n\tReselect atacker 2: ");
     }
 }
 
