@@ -478,7 +478,7 @@ void ParingGame8::input_atakers(GameState8* team, int*a1, int*a2){
 int ParingGame8::input_choose(GameState8* team, int stage){
     int choose;
     while(true){
-        printf("\n\tChoose atacker from %i (0) and %i (1): ",team->stages[stage].atacker1, team->stages[stage].atacker2);
+        printf("\n\tChoose atacker from %i (type 0) and %i (type 1): ",team->stages[stage].atacker1, team->stages[stage].atacker2);
         scanf("%i",&choose);
         if(choose != 0 && choose != 1){
             printf("Choose must be 0 or 1");

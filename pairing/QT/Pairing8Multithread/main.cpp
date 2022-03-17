@@ -43,6 +43,7 @@ int main()
                                  {7,"Uzh"}};
     */
     vector<string> playersA = {"Starrok", "Aberrat", "Strohkopf", "Servius", "Candid", "Burrito", "Sharlatan", "Uzh"};
+    vector<string> playersB = {"B0", "B1", "B2", "B3", "B4", "B5", "B6", "B7"};
 
 
     vector<ParingGame8*> pgs;
@@ -51,6 +52,7 @@ int main()
     int scores[STEP_1_THREADS];
     int best_score = ss.min_team_score;
     ParingGame8 pg_main(&ss, &ts);
+    pg_main.global_alpha = &global_alpha;
 
     std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
     vector<thread*> threads;
@@ -78,32 +80,52 @@ int main()
     std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
     std::cout << "First step took " << std::chrono::duration_cast<std::chrono::minutes>(end - begin).count() << "[min]" << std::endl;
 
-    printf("Please choose TeamA first defender, recomended players with highest score (%i):",best_score);
-    for( int i = 0 ; i < 8 ; i++){
-        if( *(scores+i) == best_score)
-            printf("[%i: %s], ",i, playersA[i].c_str());
-    }
-    //printf("\n");
-    int d1a = pg_main.input_defender(&(pg_main.teamA));
-    pg_main.teamA.set_defender(FIRST, d1a);
-    printf("Please choose TeamB first defender");
-    int d1b = pg_main.input_defender(&(pg_main.teamB));
-    pg_main.teamB.set_defender(FIRST, d1b);
-
     int score, s1, s2;
-    pg_main.max(FIRST, ATACKERS, alpha, beta, &score, &s1, &s2);
-    printf("Team A: recomend to atack with %i and %i, score will be %i", s1, s2, score);
-    int a11a, a12a;
-    pg_main.input_atakers(&(pg_main.teamA),&a11a, &a12a);
-    pg_main.teamA.set_atackers(FIRST, a11a, a12a);
+    for( int stage = FIRST ; stage <= THRID; stage++){
+        printf("======== ROUND %i =========\n",stage);
+        if( stage != 0 ){
+            pg_main.max(stage, DEFENDER, alpha, beta, &score, &s1, &s2);
+            printf("TeamA: recomend to defend with [%i %s], score will be %i\n",s1, playersA[s1].c_str(), score);
+        }
+        else{
+            printf("Please choose TeamA first defender, recomended players with highest score (%i):",best_score);
+            for( int i = 0 ; i < 8 ; i++){
+                if( *(scores+i) == best_score)
+                    printf("[%i: %s], ",i, playersA[i].c_str());
+            }
+        }
+        int d1a = pg_main.input_defender(&(pg_main.teamA));
+        pg_main.teamA.set_defender(stage, d1a);
 
-    printf("Set TeamB atackers");
-    int a11b, a12b;
-    pg_main.input_atakers(&(pg_main.teamB),&a11b, &a12b);
-    pg_main.teamB.set_atackers(FIRST, a11b, a12b);
+        printf("Please choose TeamB first defender");
+        int d1b = pg_main.input_defender(&(pg_main.teamB));
+        pg_main.teamB.set_defender(stage, d1b);
 
-    pg_main.max(FIRST, CHOOSE, alpha, beta, &score, &s1, &s2);
-    printf("TeamA: recomend to choose player %i, score will be %i", s1, score);
+
+        pg_main.max(stage, ATACKERS, alpha, beta, &score, &s1, &s2);
+        printf("Team A: recomend to atack with [%i: %s] and [%i: %s], score will be %i", s1, playersA[s1].c_str(), s2, playersA[s2].c_str(), score);
+        //int a11a, a12a;
+        int a_atackers[2];
+        pg_main.input_atakers(&(pg_main.teamA), a_atackers, a_atackers+1);
+        pg_main.teamA.set_atackers(stage, a_atackers[0], a_atackers[1]);
+
+        printf("Please set TeamB atackers");
+        //int a11b, a12b;
+        int b_atackers[2];
+        pg_main.input_atakers(&(pg_main.teamB), b_atackers, b_atackers+1);
+        pg_main.teamB.set_atackers(stage, b_atackers[0], b_atackers[1]);
+
+        pg_main.max(stage, CHOOSE, alpha, beta, &score, &s1, &s2);
+        printf("TeamA: recomend to choose [%i: %s] (type %i) atacker, score will be %i", b_atackers[s1], playersB[b_atackers[s1]].c_str(), s1, score);
+        int ca = pg_main.input_choose(&(pg_main.teamB), stage);
+        pg_main.teamB.choose_atacker(stage, ca);
+
+        printf("Please set TeamB choose: [%s] (type 0), [%s] (type 1)", playersA[a_atackers[0]].c_str(), playersA[a_atackers[1]].c_str());
+        int cb = pg_main.input_choose(&(pg_main.teamA), stage);
+        pg_main.teamA.choose_atacker(stage, cb);
+
+
+    }
 
     return 0;
 }
