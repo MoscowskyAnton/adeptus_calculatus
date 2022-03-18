@@ -12,7 +12,7 @@
 #include <chrono>
 
 #define STEP_1_THREADS 8
-#define TABLE_TYPES_NUM 2
+#define TABLE_TYPES_NUM 1
 
 using namespace std;
 
@@ -24,8 +24,36 @@ int simplefunc(std::string a)
 int main()
 {
 
+    int scores_table[8][8] = {{1,0,-2,-1,0,0,2,2},
+                    {-1,-1,-1,-1,-2,-2,-1,-1},
+                    {1,1,-1,-1,0,-1,1,1},
+                    {0,0,-1,-2,-1,-1,0,0},
+                    {2,0,-1,-2,1,-2,1,2},
+                    {-1,-1,-2,-2,-1,0,1,0},
+                    {-1,-1,-1,-2,-1,-1,-1,-1},
+                    {1,1,-2,-1,1,0,1,1}};
 
-    ScoreSheetTables ss(8, TABLE_TYPES_NUM, -2, 2);
+
+    int*** sheet = new int**[8];
+    for( int i = 0 ; i < 8; i++){
+        sheet[i] = new int*[8];
+        for( int j = 0 ; j < 8; j++){
+            sheet[i][j] = new int[1];
+            sheet[i][j][0] = scores_table[i][j];
+        }
+    }
+
+//    int*** sheet;
+//    sheet = new int**[8];
+//    for( int i = 0 ; i < 8 ; i++){
+//        sheet[i] = new int*[8];
+//        for(int j = 0 ; j < 8 ; j++){
+//            sheet[i][j] = new int;
+//            sheet[i][j][0] = scores[i][j];
+//        }
+//    }
+
+    ScoreSheetTables ss(sheet, 8, TABLE_TYPES_NUM, -2, 2);
     ss.print();
     printf("Mean %f\n",ss.mean());
 

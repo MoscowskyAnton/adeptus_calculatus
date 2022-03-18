@@ -20,10 +20,11 @@ int main(int argc, char *argv[])
                     {-1,-1,-2,-2,-1,0,1,0},
                     {-1,-1,-1,-2,-1,-1,-1,-1},
                     {1,1,-2,-1,1,0,1,1}};
-    int** sheet;
-    sheet = new int*[8];
+    int*** sheet;
+    sheet = new int**[8];
     for( int i = 0 ; i < 8 ; i++)
-        sheet[i] = scores[i];
+        sheet[i] = new int*[1];
+        sheet[i][0] = scores[i];
 
     ScoreSheetTables ss(8, 3, -2, 2);
 
