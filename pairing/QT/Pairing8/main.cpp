@@ -4,6 +4,7 @@
 #include "stdio.h"
 #include "tablesstate.h"
 
+#define TABLE_TYPES 1
 
 int main(int argc, char *argv[])
 {
@@ -25,12 +26,12 @@ int main(int argc, char *argv[])
         sheet[i][0] = scores[i];
     }
 
-    ScoreSheetTables ss(8, 3, -2, 2);
+    ScoreSheetTables ss(8, TABLE_TYPES, -2, 2);
 
     ss.print();
     printf("Mean %f\n",ss.mean());
 
-    TablesState ts(3, 8, true, false);
+    TablesState ts(TABLE_TYPES, 8, true, false);
     ts.print();
 
     ParingGame8 pg(&ss, &ts);
