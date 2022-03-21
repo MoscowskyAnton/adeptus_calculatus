@@ -24,14 +24,14 @@ int simplefunc(std::string a)
 int main()
 {
 
-    int scores_table[8][8] = {{1,0,-2,-1,0,0,2,2},
-                    {-1,-1,-1,-1,-2,-2,-1,-1},
-                    {1,1,-1,-1,0,-1,1,1},
-                    {0,0,-1,-2,-1,-1,0,0},
-                    {2,0,-1,-2,1,-2,1,2},
-                    {-1,-1,-2,-2,-1,0,1,0},
-                    {-1,-1,-1,-2,-1,-1,-1,-1},
-                    {1,1,-2,-1,1,0,1,1}};
+    int scores_table[8][8] = {{0,2,-2,1,-1,1,1,2},
+                    {-2,0,-1,-2,-1,0,-1,0},
+                    {-2,-1,-2,-1,-2,-2,-1,0},
+                    {-1,1,0,1,1,0,0,1},
+                    {-1,-1,-2,2,0,2,0,-1},
+                    {0,0,0,0,0,0,0,0},
+                    {0,-1,-1,1,0,-1,0,1},
+                    {1,1,-1,0,0,0,0,0}};
 
 
     int*** sheet = new int**[8];
@@ -71,7 +71,12 @@ int main()
                                  {7,"Uzh"}};
     */
     vector<string> playersA = {"Starrok", "Aberrat", "Strohkopf", "Servius", "Candid", "Burrito", "Sharlatan", "Uzh"};
-    vector<string> playersB = {"B0", "B1", "B2", "B3", "B4", "B5", "B6", "B7"};
+    //vector<string> playersB = {"B0", "B1", "B2", "B3", "B4", "B5", "B6", "B7"};
+
+    //vector<string> playersB = {"Harlequins","Tyranids",	"Necrons",	"Grey Knights",	"Thousand Sons",	"Tau",	"Orks",	"Craftworlds"};
+    //vector <string> playersB = {"Craftworlds","Tau","Space Wolves","Harly","Adeptus Mechanicus",	"Adeptus Custodes","Drukhari",	"Tyranids"};
+    //vector<string> playersB = {"Adeptus Astartes - Black Templars",	"Adeptus Mechanicus",	"Adeptus Custodes",	"Orks",	"Tyranids",	"CSM/CD/DG",	"Tau",	"Craftworlds"};
+    vector<string> playersB = {"Adeptus Mechanicus","Space Marines","Tau",	"Drukhari","Harlequins","Adeptus Custodes","Orks","Death Guard"};
 
 
     vector<ParingGame8*> pgs;
@@ -110,6 +115,10 @@ int main()
 
     int score, s1, s2;
     for( int stage = FIRST ; stage <= THRID; stage++){
+          printf("ENEMIES!\n");
+          for ( int i = 0 ; i < playersB.size(); i++)
+              printf("[%i %s] ",i, playersB[i].c_str());
+          printf("\n");
         printf("======== ROUND %i =========\n",stage);
         if( stage != 0 ){
             pg_main.max(stage, DEFENDER, alpha, beta, &score, &s1, &s2);
