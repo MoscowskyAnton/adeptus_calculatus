@@ -1,6 +1,36 @@
 #include "tablesstate.h"
 #include <QRandomGenerator>
 
+TablesState::TablesState(TablesState& ts){
+    tables_types_num = ts.tables_types_num;
+    tables_number = ts.tables_number;
+
+    teamA_won_1_rolloff = ts.teamA_won_1_rolloff;
+    teamA_won_2_rolloff = ts.teamA_won_2_rolloff;
+
+    tables_free = new bool[tables_number];
+    for( int i=0; i < tables_number; i++ )
+        tables_free[i] = ts.tables_free[i];
+
+    tables_types = ts.tables_types;
+
+    free_table_types = new bool[tables_types_num];
+    for( int i = 0; i < tables_types_num; i++)
+        free_table_types[i] = ts.free_table_types[i];
+
+    teamAdefenderTable = new int[3];
+    teamBdefenderTable = new int[3];
+    for( int i = 0 ; i < 3 ; i++){
+        teamAdefenderTable[i] = -1;
+        teamBdefenderTable[i] = -1;
+    }
+
+    count_table_types = ts.count_table_types;
+
+    std::vector<int> count_table_types;
+
+}
+
 TablesState::TablesState(int tables_types_num, int tables_number, bool first_rolloff, bool second_rolloff)
 {
     teamAdefenderTable = new int[3];
@@ -111,6 +141,7 @@ void TablesState::print(){
     for( int i = 0 ; i < tables_number; i++){
         printf("%i ",tables_types[i]);
     }
+    printf("\n");
 }
 
 bool TablesState::check_there_are_free_tables_of_type(int type){

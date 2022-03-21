@@ -9,6 +9,7 @@ class TablesState
 public:
     TablesState(int tables_types_num, int tables_number, bool, bool);
     TablesState(int* tables_types, int tables_types_num, int tables_number, bool , bool);
+    TablesState(TablesState& ts);
 
     int tables_types_num;
     int tables_number;
