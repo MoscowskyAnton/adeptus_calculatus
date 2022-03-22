@@ -5,7 +5,7 @@
 
 namespace pgu_simple4 {
 
-    class SetDefender : private pgu::GameStep{
+    class SetDefender : public pgu::GameStep{
     public:
         SetDefender(std::string name, pgu::PairingGameUniversal* parent_game, bool team);
 
@@ -15,7 +15,17 @@ namespace pgu_simple4 {
 
     };
 
-    pgu::PairingGameUniversal PairingGameSimple4(4,{"DEF", "C_ATCK1", "C_ATCK2", "ATCK", "REJ", "CHAMP"},{},std::map<std::string, bool>());
+
+    pgu::PairingGameUniversal pairing_game_simple4(4,{"DEF", "C_ATCK1", "C_ATCK2", "ATCK", "REJ", "CHAMP"},{},std::map<std::string, bool>());
+
+    SetDefender set_defender_A("Set defender A",&pairing_game_simple4, pgu::TEAM_A);
+    SetDefender set_defender_B("Set defender B",&pairing_game_simple4, pgu::TEAM_B);
+
+
+    std::vector<pgu::GameStep*> sequence = {&set_defender_A, &set_defender_B};
+
+
+
 }
 
 #endif // PAIRINGGAMESIMPLE4_H

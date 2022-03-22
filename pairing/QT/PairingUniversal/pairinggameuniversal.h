@@ -77,12 +77,18 @@ namespace pgu{
         TeamState* teamA;
         TeamState* teamB;
 
+
+        inline void set_seq(std::vector<GameStep*> &sequence){
+            this->sequence = sequence;
+        }
+
     private:
         int n_players;
         std::vector<std::string> player_roles;
         std::map<std::string, bool> rolloffs;
-        std::vector<GameStep*> sequence;
+
         int current_step = 0;
+        std::vector<GameStep*> sequence;
 
 
     };
