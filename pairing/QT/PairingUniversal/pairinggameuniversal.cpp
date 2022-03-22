@@ -35,7 +35,7 @@ namespace pgu {
             throw std::logic_error("no such role "+role);
         if (players[role] != -1)
             throw std::logic_error(role + " already taken");
-        if(player_id < 0 || player_id >= n_players)
+        if(player_id < 0 || player_id >= (int)n_players)
             throw std::out_of_range("player_id incorrect value "+std::to_string(player_id));
 #endif
         players[role] = player_id;
@@ -51,16 +51,43 @@ namespace pgu {
         players[role] = -1;
     }
 
-    GameRules::GameRules(int n_players, const std::vector<std::string> &player_roles, const std::vector<std::string> &sequence, const std::map<std::string, bool> &rolloffs){
+    GameStep::GameStep(std::string name, PairingGameUniversal* parent_game, bool team){
+        this->name = name;
+        this->parent_game = parent_game;
+        this->team = team;
+    }
+
+    bool GameStep::proceed_alpha_beta_max(int score, int &new_score, int &alpha, int &beta){
+        if(score >= beta){
+            return true;
+        }
+        if(score > alpha){
+            alpha = score;
+        }
+        return false;
+    }
+
+    bool GameStep::proceed_alpha_beta_min(int score, int &new_score, int &alpha, int &beta){
+        if(score <= alpha){
+            return true;
+        }
+        if(score < beta){
+            beta = score;
+        }
+        return false;
+    }
+
+    PairingGameUniversal::PairingGameUniversal(size_t n_players, const std::vector<std::string> &player_roles, const std::vector<GameStep*> &sequence, const std::map<std::string, bool> &rolloffs){
         this->n_players = n_players;
         this->player_roles = player_roles;
         this->sequence = sequence;
+
+        teamA = new TeamState(n_players, player_roles);
+        teamB = new TeamState(n_players, player_roles);
     }
 
-    PairingGameUniversal::PairingGameUniversal(const GameRules& game_rules){
-        this->game_rules = game_rules;
-        teamA = new TeamState(game_rules.n_players, game_rules.player_roles);
-        teamB = new TeamState(game_rules.n_players, game_rules.player_roles);
+    GameStep *PairingGameUniversal::next_step(){
+        return sequence[current_step+1];
     }
 
 }

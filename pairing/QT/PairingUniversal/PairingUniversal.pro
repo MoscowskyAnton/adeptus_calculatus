@@ -5,7 +5,9 @@ CONFIG -= qt
 
 SOURCES += \
         main.cpp \
+        pairinggamesimple4.cpp \
         pairinggameuniversal.cpp
 
 HEADERS += \
+    pairinggamesimple4.h \
     pairinggameuniversal.h

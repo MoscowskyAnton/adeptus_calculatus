@@ -7,6 +7,9 @@
 
 namespace pgu{
 
+    const bool TEAM_A = true;
+    const bool TEAM_B = false;
+
     class ScoreSheet{
     public:
         ScoreSheet(int n_players, int n_criterion);
@@ -28,9 +31,30 @@ namespace pgu{
 
         std::string __str();
 
+        inline int get_n_players(){
+            return n_players;
+        }
+
     private:
         int n_players;
 
+    };
+
+    class PairingGameUniversal;
+    class GameStep{
+    public:
+        GameStep(std::string name, PairingGameUniversal* parent_game, bool team);
+
+        virtual int make(int alpha, int beta) = 0;
+
+        std::string name;
+        bool alpha_beta_prune = true;
+    protected:
+        PairingGameUniversal* parent_game;
+        bool team;
+
+        bool proceed_alpha_beta_max(int score, int &new_score, int &alpha, int &beta);
+        bool proceed_alpha_beta_min(int score, int &new_score, int &alpha, int &beta);
     };
 
     //план: делаем для каждого типа свой подкласс, в котором есть список шагов, которые должен подтянуть основной алгоритм
@@ -41,30 +65,25 @@ namespace pgu{
      * sequence - how the game goes
      * roll_offs - possibly rolloffs values (true - teamA won)
      */
-    class GameRules{
-    public:
-        GameRules(){}
-        GameRules(int n_players, const std::vector<std::string> &player_roles, const std::vector<std::string> &sequence, const std::map<std::string,bool> &roll_offs);
-
-        int n_players;
-        std::vector<std::string> player_roles;
-        std::vector<std::string> sequence;
-    private:
-
-        bool check();
-
-
-    };
 
     class PairingGameUniversal
     {
+        //friend void GameStep::make();
     public:
-        PairingGameUniversal(const GameRules &game_rules);
-    private:
+        PairingGameUniversal(size_t n_players, const std::vector<std::string> &player_roles, const std::vector<GameStep*> &sequence, const std::map<std::string, bool> &rolloffs);
+
+        GameStep* next_step();
+
         TeamState* teamA;
         TeamState* teamB;
 
-        GameRules game_rules;
+    private:
+        int n_players;
+        std::vector<std::string> player_roles;
+        std::map<std::string, bool> rolloffs;
+        std::vector<GameStep*> sequence;
+        int current_step = 0;
+
 
     };
 
