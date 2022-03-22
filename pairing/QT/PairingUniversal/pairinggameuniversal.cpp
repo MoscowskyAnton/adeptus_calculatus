@@ -2,9 +2,52 @@
 #include <algorithm>
 #include <stdexcept>
 
-#define DEBUG_STUFF
+
 
 namespace pgu {
+
+    ScoreSheet::ScoreSheet(int n_players, int n_criterion, int min, int max, bool random){
+        this->n_players = n_players;
+        this->n_criterion = n_criterion;
+        this->max = max;
+        this->min = min;
+        if(random)
+            srand(time(NULL));
+
+        this->max_teamA_score = max * n_players;
+        this->min_teamA_score = min * n_players;
+
+        this->scores = new int**[n_players];
+        for( int i = 0 ; i < n_players; i++){
+            this->scores[i] = new int*[n_players];
+            for( int j =0 ; j < n_players; j++){
+                this->scores[i][j] = new int[n_criterion];
+                for(int k = 0 ; k < n_criterion; k++){
+                    if(random){
+                        this->scores[i][j][k] = min + rand() % (max-min+1);
+                    }
+                    else{
+                        this->scores[i][j][k] = 0;
+                    }
+                }
+            }
+        }
+    }
+
+    std::string ScoreSheet::__str(){
+        std::string str = "";
+        for( int i = 0 ; i < n_players; i++){
+            for( int j =0 ; j < n_players; j++){
+                str += "[";
+                for(int k = 0 ; k < n_criterion; k++){
+                    str += std::to_string(scores[i][j][k])+" ";
+                }
+                str += "] ";
+            }
+            str += "\n";
+        }
+        return str;
+    }
 
     TeamState::TeamState(int n_players, const std::vector<std::string> &player_roles){
         this->n_players = n_players;
@@ -51,13 +94,21 @@ namespace pgu {
         players[role] = -1;
     }
 
-    GameStep::GameStep(std::string name, PairingGameUniversal* parent_game, bool team){
-        this->name = name;
-        this->parent_game = parent_game;
-        this->team = team;
+    void TeamState::reset(){
+        for(auto &player : players){
+            player.second = -1;
+        }
     }
 
-    bool GameStep::proceed_alpha_beta_max(int score, int &new_score, int &alpha, int &beta){
+    GameStep::GameStep(std::string name, PairingGameUniversal* parent_game, TEAMS maximizing_team, TEAMS affected_team, std::vector<std::string> roles){
+        this->name = name;
+        this->parent_game = parent_game;
+        this->maximizing_team = maximizing_team;
+        this->affected_team = affected_team;
+        this->roles = roles;
+    }
+
+    bool GameStep::proceed_alpha_beta_max(int score, int &alpha, int &beta){
         if(score >= beta){
             return true;
         }
@@ -67,7 +118,7 @@ namespace pgu {
         return false;
     }
 
-    bool GameStep::proceed_alpha_beta_min(int score, int &new_score, int &alpha, int &beta){
+    bool GameStep::proceed_alpha_beta_min(int score, int &alpha, int &beta){
         if(score <= alpha){
             return true;
         }
@@ -77,17 +128,30 @@ namespace pgu {
         return false;
     }
 
-    PairingGameUniversal::PairingGameUniversal(size_t n_players, const std::vector<std::string> &player_roles, const std::vector<GameStep*> &sequence, const std::map<std::string, bool> &rolloffs){
+    GameStep *PairingGameUniversal::next_step(){
+        return sequence[++current_step];
+    }
+
+    PairingGameUniversal::PairingGameUniversal(size_t n_players, const std::vector<std::string> &player_roles, ScoreSheet* score_sheet){
         this->n_players = n_players;
-        this->player_roles = player_roles;
-        this->sequence = sequence;
+        this->player_roles = player_roles;        
+        this->score_sheet = score_sheet;
 
         teamA = new TeamState(n_players, player_roles);
         teamB = new TeamState(n_players, player_roles);
     }
 
-    GameStep *PairingGameUniversal::next_step(){
-        return sequence[current_step+1];
+    std::string result_to_str(const std::vector<std::pair<int, std::vector<int>>> &result){
+        std::string str ="";
+        for (auto const& x : result){
+            str += "[(";
+            for( auto const& y : x.second){
+                str += std::to_string(y)+", ";
+            }
+            str += ("): "+std::to_string(x.first)+"] ");
+        }
+        return str;
     }
+
 
 }
