@@ -24,14 +24,14 @@ int simplefunc(std::string a)
 int main()
 {
 
-    int scores_table[8][8] = {{0,2,-2,1,-1,1,1,2},
-                    {-2,0,-1,-2,-1,0,-1,0},
-                    {-2,-1,-2,-1,-2,-2,-1,0},
-                    {-1,1,0,1,1,0,0,1},
-                    {-1,-1,-2,2,0,2,0,-1},
-                    {0,0,0,0,0,0,0,0},
-                    {0,-1,-1,1,0,-1,0,1},
-                    {1,1,-1,0,0,0,0,0}};
+    int scores_table[8][8] = {{1,1,1,1,0,1,-2,0},
+                    {0,-2,0,-1,0,-1,-1,1},
+                    {-2,-1,-2,-2,-1,-1,-2,-1},
+                    {1,-1,0,0,0,0,0,-1},
+                    {-1,0,-1,0,-2,-1,-1,2},
+                    {1,1,1,1,0,1,0,1},
+                    {-2,-1,-1,-1,-1,1,-1,1},
+                    {1,1,0,0,0,0,-1,1}};
 
 
     int*** sheet = new int**[8];
@@ -75,8 +75,8 @@ int main()
 
     //vector<string> playersB = {"Harlequins","Tyranids",	"Necrons",	"Grey Knights",	"Thousand Sons",	"Tau",	"Orks",	"Craftworlds"};
     //vector <string> playersB = {"Craftworlds","Tau","Space Wolves","Harly","Adeptus Mechanicus",	"Adeptus Custodes","Drukhari",	"Tyranids"};
-    //vector<string> playersB = {"Adeptus Astartes - Black Templars",	"Adeptus Mechanicus",	"Adeptus Custodes",	"Orks",	"Tyranids",	"CSM/CD/DG",	"Tau",	"Craftworlds"};
-    vector<string> playersB = {"Adeptus Mechanicus","Space Marines","Tau",	"Drukhari","Harlequins","Adeptus Custodes","Orks","Death Guard"};
+    vector<string> playersB = {"Adeptus Astartes - Black Templars",	"Adeptus Mechanicus",	"Adeptus Custodes",	"Orks",	"Tyranids",	"CSM/CD/DG",	"Tau",	"Craftworlds"};
+    //vector<string> playersB = {"Adeptus Mechanicus","Space Marines","Tau",	"Drukhari","Harlequins","Adeptus Custodes","Orks","Death Guard"};
 
 
     vector<ParingGame8*> pgs;

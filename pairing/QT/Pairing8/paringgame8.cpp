@@ -103,9 +103,9 @@ void ParingGame8::max(int stage, int phase, int alpha, int beta, int *score, int
                 if(*score >= beta){
                     break;
                 }
-                if(*score > alpha){
-                    alpha = *score;
-                }                
+//                if(*score > alpha){
+//                    alpha = *score;
+//                }
             }
         }
     }
@@ -125,9 +125,9 @@ void ParingGame8::max(int stage, int phase, int alpha, int beta, int *score, int
                     if(*score >= beta){
                         break;
                     }
-                    if(*score > alpha){
-                        alpha = *score;
-                    }
+//                    if(*score > alpha){
+//                        alpha = *score;
+//                    }
                 }
             }
         }
@@ -145,9 +145,9 @@ void ParingGame8::max(int stage, int phase, int alpha, int beta, int *score, int
             if(*score >= beta){
                 break;
             }
-            if(*score > alpha){
-                alpha = *score;
-            }
+//            if(*score > alpha){
+//                alpha = *score;
+//            }
         }
     }
     else if(phase == TABLE_CHOOSE){
@@ -171,9 +171,9 @@ void ParingGame8::max(int stage, int phase, int alpha, int beta, int *score, int
                     if(*score >= beta){
                         break;
                     }
-                    if(*score > alpha){
-                        alpha = *score;
-                    }
+//                    if(*score > alpha){
+//                        alpha = *score;
+//                    }
                 }
             }
         }
@@ -192,9 +192,9 @@ void ParingGame8::max(int stage, int phase, int alpha, int beta, int *score, int
                     if(*score >= beta){
                         break;
                     }
-                    if(*score > alpha){
-                        alpha = *score;
-                    }
+//                    if(*score > alpha){
+//                        alpha = *score;
+//                    }
 #ifdef DEBUG_STEPS
                     printf("A END!\n");
 #endif

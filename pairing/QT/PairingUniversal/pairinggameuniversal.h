@@ -112,6 +112,9 @@ namespace pgu{
 
         virtual void play_with_input() = 0;
 
+        void set_alpha_beta_pruning(bool value);
+        void reset_states();
+
 
     protected:
         int n_players;

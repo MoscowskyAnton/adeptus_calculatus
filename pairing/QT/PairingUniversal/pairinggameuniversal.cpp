@@ -110,6 +110,7 @@ namespace pgu {
 
     bool GameStep::proceed_alpha_beta_max(int score, int &alpha, int &beta){
         if(score >= beta){
+            printf("b");
             return true;
         }
         if(score > alpha){
@@ -120,6 +121,7 @@ namespace pgu {
 
     bool GameStep::proceed_alpha_beta_min(int score, int &alpha, int &beta){
         if(score <= alpha){
+            printf("a");
             return true;
         }
         if(score < beta){
@@ -141,6 +143,16 @@ namespace pgu {
         teamB = new TeamState(n_players, player_roles);
     }
 
+    void PairingGameUniversal::set_alpha_beta_pruning(bool value){
+        for(auto &seq : sequence)
+            seq->alpha_beta_prune = value;
+    }
+
+    void PairingGameUniversal::reset_states(){
+        teamA->reset();
+        teamB->reset();
+    }
+
     std::string result_to_str(const std::vector<std::pair<int, std::vector<int>>> &result){
         std::string str ="";
         for (auto const& x : result){
@@ -152,6 +164,4 @@ namespace pgu {
         }
         return str;
     }
-
-
 }

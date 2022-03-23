@@ -21,11 +21,11 @@ SetDefender::SetDefender(std::string name, pgu::PairingGameUniversal* parent_gam
                 ts->remove_role(roles[0]);
                 parent_game->desrease_step();
                 if(maximizing_team == pgu::TEAM_A){
-                    if(proceed_alpha_beta_max(score, alpha, beta) && alpha_beta_prune)
+                    if(alpha_beta_prune && proceed_alpha_beta_max(score, alpha, beta))
                         break;
                 }
                 else{                    
-                    if(proceed_alpha_beta_min(score, alpha, beta) && alpha_beta_prune)
+                    if(alpha_beta_prune && proceed_alpha_beta_min(score, alpha, beta))
                         break;
                 }
             }
@@ -61,11 +61,11 @@ SetDefender::SetDefender(std::string name, pgu::PairingGameUniversal* parent_gam
                         parent_game->desrease_step();
 
                         if(maximizing_team == pgu::TEAM_A){
-                            if(proceed_alpha_beta_max(score, alpha, beta) && alpha_beta_prune)
+                            if(alpha_beta_prune && proceed_alpha_beta_max(score, alpha, beta))
                                 break;
                         }
                         else{
-                            if(proceed_alpha_beta_min(score, alpha, beta) && alpha_beta_prune)
+                            if(alpha_beta_prune && proceed_alpha_beta_min(score, alpha, beta))
                                 break;
                         }
                     }
@@ -101,11 +101,11 @@ SetDefender::SetDefender(std::string name, pgu::PairingGameUniversal* parent_gam
             ts->remove_role(roles[1]);
             parent_game->desrease_step();
             if(maximizing_team == pgu::TEAM_A){
-                if(proceed_alpha_beta_max(score, alpha, beta) && alpha_beta_prune)
+                if(alpha_beta_prune && proceed_alpha_beta_max(score, alpha, beta))
                     break;
             }
             else{
-                if(proceed_alpha_beta_min(score, alpha, beta) && alpha_beta_prune)
+                if(alpha_beta_prune && proceed_alpha_beta_min(score, alpha, beta))
                     break;
             }
         }
@@ -198,7 +198,7 @@ SetDefender::SetDefender(std::string name, pgu::PairingGameUniversal* parent_gam
 
     PairingGameSimple4* init_machine(bool alpha_beta_pruning){
 
-        pgu::ScoreSheet* score_sheet = new pgu::ScoreSheet(4,1,0,20,true);
+        pgu::ScoreSheet* score_sheet = new pgu::ScoreSheet(4,1,-10,10,true);
 
         PairingGameSimple4* pairing_game_simple4 = new PairingGameSimple4({"DEF", "C_ATCK1", "C_ATCK2", "ATCK", "REJ", "CHAMP"}, score_sheet);
 
@@ -210,12 +210,10 @@ SetDefender::SetDefender(std::string name, pgu::PairingGameUniversal* parent_gam
         ChooseAtacker* choose_atacker_B = new ChooseAtacker("Choose atacker B", pairing_game_simple4, pgu::TEAM_B, pgu::TEAM_A);
         Finale* finale = new Finale("Finale", pairing_game_simple4);
 
-        std::vector<pgu::GameStep*> sequence = {set_defender_A, set_defender_B, set_atackers_A, set_atackers_B, choose_atacker_A, choose_atacker_B, finale};
-        for(auto const &seq : sequence){
-            seq->alpha_beta_prune = alpha_beta_pruning;
-        }
-
+        std::vector<pgu::GameStep*> sequence = {set_defender_A, set_defender_B, set_atackers_A, set_atackers_B, choose_atacker_A, choose_atacker_B, finale};        
         pairing_game_simple4->set_seq(sequence);
+
+        pairing_game_simple4->set_alpha_beta_pruning(alpha_beta_pruning);
 
         return pairing_game_simple4;
 
