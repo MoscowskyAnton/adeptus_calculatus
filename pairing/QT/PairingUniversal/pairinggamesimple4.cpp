@@ -11,21 +11,24 @@ SetDefender::SetDefender(std::string name, pgu::PairingGameUniversal* parent_gam
         affected_team == pgu::TEAM_A ? ts = parent_game->teamA : ts = parent_game->teamB;
 
         std::vector<std::pair<int, std::vector<int>>> scores;
-        int score;
+        int m_score;
+        maximizing_team == pgu::TEAM_A ? m_score = parent_game->score_sheet->min_teamA_score : m_score = parent_game->score_sheet->max_teamA_score;
         for( int i = 0; i < ts->get_n_players(); i++){
             if(ts->is_player_free(i)){
                 ts->set_role(roles[0], i);
 
-                score = parent_game->next_step()->make(alpha, beta).begin()->first;
+                int score = parent_game->next_step()->make(alpha, beta).begin()->first;
                 std::vector<int> selected_player = {i};
                 scores.push_back({score,{selected_player}});
                 ts->remove_role(roles[0]);
                 parent_game->desrease_step();
                 if(maximizing_team == pgu::TEAM_A){
-                    if(alpha_beta_prune && proceed_alpha_beta_max(score, alpha, beta))
+                    m_score = std::max(m_score, score);
+                    if(alpha_beta_prune && proceed_alpha_beta_max(m_score, alpha, beta))
                         break;
                 }
                 else{                    
+                    m_score = std::min(m_score, score);
                     if(alpha_beta_prune && proceed_alpha_beta_min(score, alpha, beta))
                         break;
                 }
@@ -44,7 +47,8 @@ SetDefender::SetDefender(std::string name, pgu::PairingGameUniversal* parent_gam
         pgu::TeamState* ts;
         affected_team == pgu::TEAM_A  ? ts = parent_game->teamA : ts = parent_game->teamB;
 
-        int score;
+        int m_score;
+        maximizing_team == pgu::TEAM_A ? m_score = parent_game->score_sheet->min_teamA_score : m_score = parent_game->score_sheet->max_teamA_score;
         std::vector<std::pair<int, std::vector<int>>> scores;
 
         for( int i = 0; i < ts->get_n_players(); i++){
@@ -54,7 +58,7 @@ SetDefender::SetDefender(std::string name, pgu::PairingGameUniversal* parent_gam
                         ts->set_role(roles[0], i);
                         ts->set_role(roles[1], j);
 
-                        score = parent_game->next_step()->make(alpha, beta).begin()->first;
+                        int score = parent_game->next_step()->make(alpha, beta).begin()->first;
                         std::vector<int> selected_players = {i, j};
                         scores.push_back({score,{selected_players}});
                         ts->remove_role(roles[0]);
@@ -62,11 +66,13 @@ SetDefender::SetDefender(std::string name, pgu::PairingGameUniversal* parent_gam
                         parent_game->desrease_step();
 
                         if(maximizing_team == pgu::TEAM_A){
-                            if(alpha_beta_prune && proceed_alpha_beta_max(score, alpha, beta))
+                            m_score = std::max(m_score, score);
+                            if(alpha_beta_prune && proceed_alpha_beta_max(m_score, alpha, beta))
                                 break;
                         }
                         else{
-                            if(alpha_beta_prune && proceed_alpha_beta_min(score, alpha, beta))
+                            m_score = std::min(m_score, score);
+                            if(alpha_beta_prune && proceed_alpha_beta_min(m_score, alpha, beta))
                                 break;
                         }
                     }
@@ -87,7 +93,8 @@ SetDefender::SetDefender(std::string name, pgu::PairingGameUniversal* parent_gam
         affected_team == pgu::TEAM_A ? ts = parent_game->teamA : ts = parent_game->teamB; // swapped back!
 
         std::vector<std::pair<int, std::vector<int>>> scores;
-        int score;
+        int m_score;
+        maximizing_team == pgu::TEAM_A ? m_score = parent_game->score_sheet->min_teamA_score : m_score = parent_game->score_sheet->max_teamA_score;
 
         for( int i = 1, j = 2; i < 3; i++, j--){
             std::string c_role1 = "C_ATCK"+std::to_string(i);
@@ -95,18 +102,20 @@ SetDefender::SetDefender(std::string name, pgu::PairingGameUniversal* parent_gam
             ts->set_role(roles[0], ts->players[c_role1]);
             ts->set_role(roles[1], ts->players[c_role2]);
 
-            score = parent_game->next_step()->make(alpha, beta).begin()->first;
+            int score = parent_game->next_step()->make(alpha, beta).begin()->first;
             std::vector<int> selected_player = {ts->players[c_role1], ts->players[c_role2]};
             scores.push_back({score,{selected_player}});
             ts->remove_role(roles[0]);
             ts->remove_role(roles[1]);
             parent_game->desrease_step();
             if(maximizing_team == pgu::TEAM_A){
-                if(alpha_beta_prune && proceed_alpha_beta_max(score, alpha, beta))
+                m_score = std::max(m_score, score);
+                if(alpha_beta_prune && proceed_alpha_beta_max(m_score, alpha, beta))
                     break;
             }
             else{
-                if(alpha_beta_prune && proceed_alpha_beta_min(score, alpha, beta))
+                m_score = std::min(m_score, score);
+                if(alpha_beta_prune && proceed_alpha_beta_min(m_score, alpha, beta))
                     break;
             }
         }
