@@ -3,7 +3,7 @@
 
 #include "pairinggameuniversal.h"
 
-namespace pgu_simple4 {
+namespace pgu_simple4 {   
 
     class SetDefender : public pgu::GameStep{
     public:

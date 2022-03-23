@@ -3,6 +3,7 @@
 
 namespace pgu_simple4 {   
 
+
 SetDefender::SetDefender(std::string name, pgu::PairingGameUniversal* parent_game, pgu::TEAMS maximizing_team, pgu::TEAMS affected_team) : GameStep(name, parent_game, maximizing_team, affected_team, {"DEF"}){}
 
     std::vector<std::pair<int, std::vector<int>>> SetDefender::make(int alpha, int beta){
@@ -192,7 +193,7 @@ SetDefender::SetDefender(std::string name, pgu::PairingGameUniversal* parent_gam
         str += std::to_string(teamA->players["REJ"])+"-"+std::to_string(teamB->players["REJ"])+":"+std::to_string(score_sheet->get(teamA->players["REJ"],teamB->players["REJ"],0))+"\n";
         str += std::to_string(teamA->players["CHAMP"])+"-"+std::to_string(teamB->players["CHAMP"])+":"+std::to_string(score_sheet->get(teamA->players["CHAMP"],teamB->players["CHAMP"],0))+"\n";
         int score = calc_score();
-        str += "Total: "+std::to_string(score)+"-"+std::to_string(score_sheet->max_teamA_score - score)+"\n";
+        str += "Total: "+std::to_string(score)+"-"+std::to_string((score_sheet->max_teamA_score + score_sheet->min_teamA_score) - score)+"\n";
         return str;
     }
 
