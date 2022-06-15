@@ -106,7 +106,7 @@ namespace pgu {
         for( int i = 0 ; i < n_players; i++){
             tables_types.push_back(rand() % table_types);
             tables_to_players[i] = "";
-        }80111172134069
+        }
     }
 
     std::vector<int> TablesState::get_free_types(){
