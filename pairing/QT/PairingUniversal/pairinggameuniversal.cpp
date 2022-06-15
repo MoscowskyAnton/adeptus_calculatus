@@ -181,10 +181,10 @@ namespace pgu {
 
     bool GameStep::proceed_alpha_beta_min(int score, int &alpha, int &beta){
         // uncomenting this sometimes leads to different scores in vanila minmax and alpha-beta pruned one
-//        if(score <= alpha){
-//            printf("a");
-//            return true;
-//        }
+        if(score <= alpha){
+            //printf("a");
+            return true;
+        }
         if(score < beta){
             beta = score;
         }
