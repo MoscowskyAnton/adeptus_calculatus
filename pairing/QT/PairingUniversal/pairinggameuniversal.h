@@ -44,7 +44,7 @@ namespace pgu{
         bool is_player_free(int player_id);
 
         void set_role(std::string role, int player_id);
-        void remove_role(std::string role);
+        int remove_role(std::string role);
 
         std::string __str();
 
@@ -56,6 +56,26 @@ namespace pgu{
 
     private:
         int n_players;
+
+    };
+
+    class TablesState{
+    public:
+        TablesState(int n_players, int table_types);
+
+        //std::vector<int> get_all_types();
+        std::vector<int> get_free_types();
+
+        void set_table_by_type(int table_type, std::string player);
+        void set_table_by_no(int table, std::string player);
+
+        void remove_table_by_player(std::string player);
+
+        int get_table_type_by_player(std::string player);
+
+    private:
+        std::vector<int> tables_types;
+        std::map<int, std::string> tables_to_players;
 
     };
 
@@ -110,10 +130,12 @@ namespace pgu{
         }
         inline void desrease_step(){current_step--;}
 
-        virtual void play_with_input() = 0;
+        //virtual void play_with_input() = 0;
 
         void set_alpha_beta_pruning(bool value);
         void reset_states();
+
+        virtual std::string final_standings_str() = 0;
 
 
     protected:

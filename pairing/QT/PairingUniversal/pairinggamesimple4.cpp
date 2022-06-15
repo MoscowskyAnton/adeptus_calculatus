@@ -4,7 +4,7 @@
 namespace pgu_simple4 {   
 
 
-SetDefender::SetDefender(std::string name, pgu::PairingGameUniversal* parent_game, pgu::TEAMS maximizing_team, pgu::TEAMS affected_team) : GameStep(name, parent_game, maximizing_team, affected_team, {"DEF"}){}
+    SetDefender::SetDefender(std::string name, pgu::PairingGameUniversal* parent_game, pgu::TEAMS maximizing_team, pgu::TEAMS affected_team) : GameStep(name, parent_game, maximizing_team, affected_team, {"DEF"}){}
 
     std::vector<std::pair<int, std::vector<int>>> SetDefender::make(int alpha, int beta){
         pgu::TeamState* ts;

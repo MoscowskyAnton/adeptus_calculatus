@@ -84,20 +84,80 @@ namespace pgu {
         players[role] = player_id;
     }
 
-    void TeamState::remove_role(std::string role){
+    int TeamState::remove_role(std::string role){
 #ifdef DEBUG_STUFF
         if (!players.count(role))
             throw std::logic_error("no such role "+role);
         if (players[role] == -1)
             throw std::logic_error(role + " is already unset");
 #endif
+        int p_role = players[role];
         players[role] = -1;
+        return p_role;
     }
 
     void TeamState::reset(){
         for(auto &player : players){
             player.second = -1;
         }
+    }
+
+    TablesState::TablesState(int n_players, int table_types){
+        for( int i = 0 ; i < n_players; i++){
+            tables_types.push_back(rand() % table_types);
+            tables_to_players[i] = "";
+        }
+    }
+
+    std::vector<int> TablesState::get_free_types(){
+        std::vector<int> free_types;
+        for( auto &t2p : tables_to_players){
+            if( t2p.second.empty() ){
+                free_types.push_back(tables_types[t2p.first]);
+            }
+        }
+        std::sort(free_types.begin(), free_types.end());
+        std::vector<int>::iterator it;
+        it = std::unique(free_types.begin(), free_types.end());
+        free_types.resize(std::distance(free_types.begin(),it));
+        return free_types;
+    }
+
+    void TablesState::set_table_by_no(int table, std::string player){
+        if( !tables_to_players[table].empty() )
+            throw std::logic_error("table "+std::to_string(table)+" already taken by player "+tables_to_players[table]);
+        tables_to_players[table] = player;
+    }
+
+    void TablesState::set_table_by_type(int table_type, std::string player){
+        for(auto &t2p:tables_to_players){
+            if( t2p.second.empty()){
+                if( this->tables_types[t2p.first] == table_type){
+                    tables_to_players[t2p.first] = player;
+                    return;
+                }
+            }
+        }
+        throw std::logic_error("no free type "+std::to_string(table_type)+" in tables");
+    }
+
+    void TablesState::remove_table_by_player(std::string player){
+        for(auto &t2p:tables_to_players){
+            if( t2p.second == player){
+                t2p.second = "";
+                return;
+            }
+        }
+        throw std::logic_error("no table for player role "+player+" in tables");
+    }
+
+    int TablesState::get_table_type_by_player(std::string player){
+        for(auto &t2p:tables_to_players){
+            if( t2p.second == player){
+                return tables_types[t2p.first];
+            }
+        }
+        throw std::logic_error("no table for player role "+player+" in tables");
     }
 
     GameStep::GameStep(std::string name, PairingGameUniversal* parent_game, TEAMS maximizing_team, TEAMS affected_team, std::vector<std::string> roles){
@@ -110,7 +170,7 @@ namespace pgu {
 
     bool GameStep::proceed_alpha_beta_max(int score, int &alpha, int &beta){
         if(score >= beta){
-            printf("b");
+            //printf("b");
             return true;
         }
         if(score > alpha){
@@ -120,10 +180,11 @@ namespace pgu {
     }
 
     bool GameStep::proceed_alpha_beta_min(int score, int &alpha, int &beta){
-        if(score <= alpha){
-            printf("a");
-            return true;
-        }
+        // uncomenting this sometimes leads to different scores in vanila minmax and alpha-beta pruned one
+//        if(score <= alpha){
+//            printf("a");
+//            return true;
+//        }
         if(score < beta){
             beta = score;
         }

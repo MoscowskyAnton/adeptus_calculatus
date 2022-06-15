@@ -38,7 +38,6 @@ namespace pgu_simple4 {
         PairingGameSimple4(const std::vector<std::string> &player_roles, pgu::ScoreSheet* score_sheet) : PairingGameUniversal(4, player_roles, score_sheet){}
         int calc_score();
         void play_with_input();
-
         std::string final_standings_str();
 
     private:
