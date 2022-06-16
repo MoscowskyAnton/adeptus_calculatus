@@ -48,6 +48,8 @@ namespace pgu_8 {
         void play_with_input(bool teamA_won_roll_off);
         std::string final_standings_str();
 
+        void make_first_step(bool teamA_won_roll_off);
+
         pgu::TablesState* tables_state;
     private:
 
