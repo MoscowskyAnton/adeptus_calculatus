@@ -28,7 +28,7 @@ int main()
     //pg8->play_with_input(teamA_won_roll_off);
 
     std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
-    pg8->make_first_step(teamA_won_roll_off);
+    pg8->make_first_first_step(teamA_won_roll_off);
     std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
 
     std::cout << "Time difference = " << std::chrono::duration_cast<std::chrono::minutes>(end - begin).count() << "[min]" << std::endl;

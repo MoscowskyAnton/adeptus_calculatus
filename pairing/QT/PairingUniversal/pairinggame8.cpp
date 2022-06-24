@@ -240,7 +240,18 @@ namespace pgu_8 {
 
         std::vector<std::pair<int, std::vector<int>>> result = sequence[0]->make(alpha, beta);
         printf("%s\n", pgu::result_to_str(result).c_str());
+    }
 
+    void PairingGame8::make_first_first_step(bool teamA_won_roll_off){
+        int alpha = score_sheet->min_teamA_score;
+        int beta = score_sheet->max_teamA_score;
+
+        printf("%s",score_sheet->__str().c_str());
+
+        teamA->set_role("DEF1", 0);
+        current_step = 1;
+        std::vector<std::pair<int, std::vector<int>>> result = sequence[1]->make(alpha, beta);
+        printf("%s\n", pgu::result_to_str(result).c_str());
     }
 
     void PairingGame8::play_with_input(bool teamA_won_roll_off){
