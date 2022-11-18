@@ -58,11 +58,4 @@ def boxplot( data, ax, labels, color = 'r', rotation  = 0):
 
 
 if __name__ == '__main__' :
-    
-    # here should be unit tests
-    pure = 0
-    rr_ones = 0
-    for n in range(1000):
-        pure += d6()
-        rr_ones += d6rr()
-    print(pure, rr_ones)
+    pass
