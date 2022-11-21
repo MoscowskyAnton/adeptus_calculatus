@@ -17,7 +17,10 @@ def roll_d6(max_ = False):
     return np.random.randint(1,7)
 
 def roll_ndx(n, f, max_ = False):
-    return n * f(max_)
+    r = 0
+    for _ in range(n):
+        r += f(max_)
+    return r
 
 '''
     This class parses input regular string like '2D6+3' to function that calculates value randomly
@@ -41,7 +44,7 @@ class AC_REGULAR(object):
         dst = dst.lower()
         # check allowed
         if set(dst) > AC_REGULAR.allowed_symbols:
-            raise ValueError(f'AC_REGULAR.__init__: invalid string {reg}')
+            raise ValueError(f'AC_REGULAR.__init__: invalid string {reg}, allowed symbols are {AC_REGULAR.allowed_symbols}')
         # split by +
         self.parsed = []
         parts = dst.split('+')
@@ -79,7 +82,7 @@ class AC_REGULAR(object):
                             
 if __name__ == '__main__' :
     
-    a = AC_REGULAR('6d6')
+    a = AC_REGULAR('2d6+6')
     print(a.roll())
     print(a.roll())
     print(a.roll(True))
