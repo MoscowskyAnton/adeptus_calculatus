@@ -12,6 +12,7 @@ class AC_WEAPON_TYPE(Enum):
     RAPID_FIRE = auto()
     PISTOL = auto()
     MELEE = auto()
+    OTHER = auto()
     
     def __str__(self):
         return self.name
@@ -40,6 +41,11 @@ class AC_WEAPON(object):
         
         self.abilities = abilities
             
+    '''
+    Gives number of shots from weapon
+    args:
+        range_ 
+    '''
     def get_shots(self, range_ = 0):
         if range_ > self.range:
             return 0
