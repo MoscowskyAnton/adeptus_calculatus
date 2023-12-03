@@ -9,6 +9,7 @@ AC_MOVE = Enum('MOVE', ['NORMAL', 'REMAIN_STATIONARY', 'FOLL_BACK', 'ADVANCE'])
 
 class AC_WEAPON(object):        
     
+    # TODO move to AC_ABILITIES class
     RAPID_FIRE = 'RAPID_FIRE'
     TORRENT = 'TORRENT'
     MELTA = 'MELTA'
@@ -18,6 +19,9 @@ class AC_WEAPON(object):
     MOVEMENT_TYPE = 'MOVEMENT_TYPE'
     SUSTANED_HITS = 'SUSTANED_HITS'
     IGNORES_COVER = 'IGNORES_COVER'
+    PLUS_BS = 'PLUS_BS'
+    IN_COVER = 'IN_COVER'
+    IGNORE_DAMAGE = 'IGNORE_DAMAGE'
     
     '''
     Constructs weapon class
@@ -109,6 +113,8 @@ class AC_WEAPON(object):
         wounds = 0
         value_to_hit = self.skill
         # TODO modifiers
+        if AC_WEAPON.PLUS_BS in self.args_abilities:
+            value_to_hit = max(2, value_to_hit - 1)
         
         if AC_WEAPON.TORRENT in self.args_abilities:
             return attacks, 0
@@ -128,8 +134,6 @@ class AC_WEAPON(object):
                         hits += self.kwargs_abilities[AC_WEAPON.SUSTANED_HITS]
                 elif die >= value_to_hit:
                     hits += 1
-        
-        #print(hits, wounds)
         return hits, wounds
 
     '''
@@ -138,7 +142,7 @@ class AC_WEAPON(object):
     def get_wounds(self, target, range_ = 0):
         hits, wounds = self.get_hits(range_)
         
-        saves, no_saves = 0, 0
+        saves, no_saves = wounds, 0
         
         if self.strength *2 <= target.toughness:
             to_wound_value = 6
@@ -174,7 +178,12 @@ class AC_WEAPON(object):
         damage = 0
         saves, no_saves = self.get_wounds(target, range_)
         damages = no_saves
-        save = target.save + self.ap # TODO cover
+        save = target.save + self.ap 
+        
+        if AC_WEAPON.IN_COVER in target.args_abilities:
+            if save != 3 and self.ap != 0:
+                save = max(2, save-1)
+        
         if target.invul != 0:
             save = min(save, target.invul)
         
@@ -183,7 +192,6 @@ class AC_WEAPON(object):
             
             if die == 1 or die < save:
                 damages += 1
-                
                 
         for i in range(damages):   
             damage += self._damage()
