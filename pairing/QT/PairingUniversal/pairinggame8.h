@@ -5,6 +5,16 @@
 
 namespace pgu_8 {
 
+    /*
+    class SetDefenderMultiThread : public pgu::GameStep{
+    public:
+        SetDefenderMultiThread(std::string name, pgu::PairingGameUniversal* parent_game, pgu::TEAMS maximizing_team, pgu::TEAMS affected_team, std::string phase);
+        virtual std::vector<std::pair<int, std::vector<int>>> make(int alpha, int beta);
+    private:
+        std::string phase;
+
+    };*/
+
     class SetDefender : public pgu::GameStep{
     public:
         SetDefender(std::string name, pgu::PairingGameUniversal* parent_game, pgu::TEAMS maximizing_team, pgu::TEAMS affected_team, std::string phase);

@@ -51,12 +51,22 @@ if __name__ == '__main__':
     data_stationary_melta = LemanRussDemolisherLH.get_data_damage_target(GladiatorLancer, 10, N)
     data_stationary_no_melta = LemanRussDemolisherLH.get_data_damage_target(GladiatorLancer, 20, N)
     data_full_melta = LemanRussDemolisher.get_data_damage_target(GladiatorLancer, 8, N)
+    data_melta = LemanRussDemolisher.get_data_damage_target(GladiatorLancer, 10, N)
     
     stat_melta_pc = LemanRussDemolisherLH.get_success_percent_damage_on_target(GladiatorLancer, data_stationary_melta)
     stat_no_melta_pc = LemanRussDemolisherLH.get_success_percent_damage_on_target(GladiatorLancer, data_stationary_no_melta)
     melta_pc = LemanRussDemolisher.get_success_percent_damage_on_target(GladiatorLancer, data_full_melta)
+    melta_small_pc = LemanRussDemolisher.get_success_percent_damage_on_target(GladiatorLancer, data_melta) 
     
-    ac_plot.violinplots([data_stationary_melta, data_full_melta, data_stationary_no_melta], plt.gca(), ['LH small melta {:.2f}'.format(stat_melta_pc), 'Full Melta (no LH) {:.2f}'.format(melta_pc), 'LH no melta {:.2f}'.format(stat_no_melta_pc)])
+    ac_plot.violinplots([data_stationary_melta, 
+                         data_full_melta, 
+                         data_melta,
+                         data_stationary_no_melta                         
+                         ], plt.gca(), ['LH small melta {:.2f}'.format(stat_melta_pc), 
+                                        'Full Melta (no LH) {:.2f}'.format(melta_pc), 
+                                        'Small Melta (no LH) {:.2f}'.format(melta_small_pc),
+                                        'LH no melta {:.2f}'.format(stat_no_melta_pc)]
+                                        )
     plt.title('Lethal vs melta on LRD')
     plt.show()
     

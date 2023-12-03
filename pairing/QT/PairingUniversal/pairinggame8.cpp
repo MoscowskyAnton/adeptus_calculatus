@@ -3,6 +3,53 @@
 
 namespace pgu_8 {
 
+    /*
+    SetDefenderMultiThread::SetDefenderMultiThread(std::string name, pgu::PairingGameUniversal *parent_game, pgu::TEAMS maximizing_team, pgu::TEAMS affected_team, std::string phase) : pgu::GameStep(name, parent_game, maximizing_team, affected_team, {"DEF"+phase}){
+        this->phase = phase;
+    }
+
+    std::vector<std::pair<int, std::vector<int>>> SetDefenderMultiThread::make(int alpha, int beta){
+        pgu::TeamState* ts;
+        affected_team == pgu::TEAM_A ? ts = parent_game->teamA : ts = parent_game->teamB;
+
+        std::vector<std::pair<int, std::vector<int>>> scores;
+        int m_score;
+        maximizing_team == pgu::TEAM_A ? m_score = parent_game->score_sheet->min_teamA_score : m_score = parent_game->score_sheet->max_teamA_score;
+        for( int i = 0; i < ts->get_n_players(); i++){
+            if(affected_team == pgu::TEAM_B){
+                if( !phase.compare("1"))
+                    printf("DefB [%s] \n", phase.c_str());
+            }
+
+            if(ts->is_player_free(i)){
+                ts->set_role(roles[0], i);
+
+                int score = parent_game->next_step()->make(alpha, beta).begin()->first;
+                std::vector<int> selected_player = {i};
+                scores.push_back({score,{selected_player}});
+                ts->remove_role(roles[0]);
+                parent_game->desrease_step();
+                if(maximizing_team == pgu::TEAM_A){
+                    m_score = std::max(m_score, score);
+                    if(alpha_beta_prune && proceed_alpha_beta_max(m_score, alpha, beta))
+                        break;
+                }
+                else{
+                    m_score = std::min(m_score, score);
+                    if(alpha_beta_prune && proceed_alpha_beta_min(score, alpha, beta))
+                        break;
+                }
+            }
+        }
+        if(maximizing_team == pgu::TEAM_A)
+            std::sort(scores.rbegin(), scores.rend());
+        else
+            std::sort(scores.begin(), scores.end());
+        return scores;
+    }
+    */
+
+
     SetDefender::SetDefender(std::string name, pgu::PairingGameUniversal *parent_game, pgu::TEAMS maximizing_team, pgu::TEAMS affected_team, std::string phase) : pgu::GameStep(name, parent_game, maximizing_team, affected_team, {"DEF"+phase}){
         this->phase = phase;
     }
@@ -313,7 +360,7 @@ namespace pgu_8 {
     PairingGame8* init_machine(bool alpha_beta_pruning, bool teamA_won_roll_off){
         bool TAWFRF = teamA_won_roll_off; // team A won roll-off
 
-        int n_tables = 1;
+        int n_tables = 3;
 
         pgu::ScoreSheet * score_sheet = new pgu::ScoreSheet(8,n_tables,-2,2,true);
         pgu::TablesState * tbl_s = new pgu::TablesState(8, n_tables);
