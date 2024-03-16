@@ -19,8 +19,12 @@ int ParingGame4::get_score(){
         score += SS->ind(teamA.stages[i].defender, teamB.stages[i].choosed_atacker, TS->tables_types[TS->teamAdefenderTable]);
         score += SS->ind(teamA.stages[i].choosed_atacker, teamB.stages[i].defender, TS->tables_types[TS->teamBdefenderTable]);
     }
+    /*
     score += SS->ind(teamA.rejected_last_atacker, teamB.rejected_last_atacker, TS->tables_types[TS->rejectedPlayersTable]);
     score += SS->ind(teamA.champion, teamB.champion, TS->tables_types[TS->championsPlayersTable]);
+    */
+    score += SS->ind(teamA.rejected_last_atacker, teamB.champion, TS->tables_types[TS->rejectedPlayersTable]);
+    score += SS->ind(teamA.champion, teamB.rejected_last_atacker, TS->tables_types[TS->championsPlayersTable]);
     return score;
 }
 

@@ -3,6 +3,8 @@
 #include <QRandomGenerator>
 #include <QMessageBox>
 #include <QFileDialog>
+#include <QTextStream>
+#include <QFile>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -237,7 +239,8 @@ void MainWindow::fill_ts(){
     for(int i = 0 ; i < PLAYERS_NUM; i++){
         new_ts[i] = CB_tables[i]->currentIndex();
     }
-    TS = new TablesState(new_ts, TABLE_TYPES_NUM, PLAYERS_NUM, ui->cb_1st_rolloff->isChecked(), ui->cb_2nd_rolloff->isChecked());
+    //TS = new TablesState(new_ts, TABLE_TYPES_NUM, PLAYERS_NUM, ui->cb_1st_rolloff->isChecked(), ui->cb_2nd_rolloff->isChecked());
+    TS = new TablesState(new_ts, TABLE_TYPES_NUM, PLAYERS_NUM, ui->cb_1st_rolloff->isChecked(), !ui->cb_1st_rolloff->isChecked()); // GoldFish style
 }
 
 void MainWindow::lock_A_defs(bool flag){
@@ -927,11 +930,13 @@ void MainWindow::final(int rejected_table){
         }
         else if(i == PG4->TS->rejectedPlayersTable){
             Aid = PG4->teamA.rejected_last_atacker;
-            Bid = PG4->teamB.rejected_last_atacker;
+            //Bid = PG4->teamB.rejected_last_atacker;
+            Bid = PG4->teamB.champion;
         }
         else if(i == PG4->TS->championsPlayersTable){
             Aid = PG4->teamA.champion;
-            Bid = PG4->teamB.champion;
+            //Bid = PG4->teamB.champion;
+            Bid = PG4->teamB.rejected_last_atacker;
         }
         else{
             //crap!
