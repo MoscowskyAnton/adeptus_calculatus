@@ -25,14 +25,17 @@ class AC_UNIT(object):
         self.oc = oc
         
         self.weapons = []
+        self.add_weapons(weapons)
+                
+        self.args_abilities = args
+        self.kwargs_abilities = kwargs
+        
+        
+    def add_weapons(self, weapons):
         for wep in weapons:
             wc = copy.copy(wep)
             wc.args_abilities = wc.args_abilities + args
             self.weapons.append(wc)
-            
-        
-        self.args_abilities = args
-        self.kwargs_abilities = kwargs
     
     
     def attack_target(self, target, range_):
