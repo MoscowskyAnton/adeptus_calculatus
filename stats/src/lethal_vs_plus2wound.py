@@ -8,19 +8,23 @@ import ac_core
 
 if __name__ == '__main__' :
         
-    N = 100000
+    N = 1000000
     
-    to_hits = [2, 3, 4, 5]    
+    to_hits = [2, 3, 4, 5, 6]
     full_rerolls = [True, False]    
     to_wounds = [2, 3, 4, 5, 6]
     
     for to_hit in to_hits:
         for full_reroll in full_rerolls:                        
             
+            name = f"lethal_vs_plus_wound_{to_hit}_{full_reroll}"
+            print(f"proc: {name}")
+
             all_lethal_cnt = []
             all_plus_wound_cnt = []
             all_nothing_cnt = []
             
+
             for to_wound in to_wounds:
                 
                 lethal_cnt = []
@@ -46,7 +50,7 @@ if __name__ == '__main__' :
                             else:
                                 lethal_cnt.append(0)
                         
-                        if wound_roll == 0:
+                        if wound_roll == 1:
                             plus_wound_cnt.append(0)
                         elif wound_roll+1 >= to_wound:
                             plus_wound_cnt.append(1)
@@ -67,8 +71,7 @@ if __name__ == '__main__' :
                 all_plus_wound_cnt.append(plus_wound_cnt)
                 all_nothing_cnt.append(nothing_cnt)
                         
-            
-            name = f"lethal_vs_plus_wound_{to_hit}_{full_reroll}"
+
             plt.figure(name)
             plt.title(f"Scions Lethals vs Plus Wound\nto hit={to_hit}, full reroll={full_reroll}")
             
