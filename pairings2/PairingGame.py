@@ -74,7 +74,6 @@ class PairingGame(object):
         return atackers
     
     def set_atackers_pair(self, team, state, atackers_pair):
-        #taken = [p[team] for p in self.formed_pairs]
         for a in atackers_pair:
             if state.players_status[team][a] != 'F':
                 raise ValueError(f"Atacker {a} is already taken for team {team}, status = {state.players_status[team][a]}")
@@ -188,7 +187,7 @@ class PairingGame(object):
         
         return actions
     
-    def get_all_finalize_game_actions(self, state):
+    def get_all_finalize_game_actions_champ_with_champ(self, state):
         actions = [partial(self.finalize_game_champ_with_champ, table_for_rej = t) for t in [0,1]]
         return actions
     

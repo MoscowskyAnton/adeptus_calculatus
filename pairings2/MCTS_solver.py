@@ -10,7 +10,7 @@ import numpy as np
 #from collections import defaultdict
 from functools import partial
 
-class MTCS_node(object):
+class MCTS_node(object):
     def __init__(self, solver, state, parent = None, parent_action = None):
         
         self.solver = solver
@@ -47,7 +47,7 @@ class MTCS_node(object):
         
         next_state = self.move(action)
         
-        child_node = MTCS_node(self.solver, next_state, parent=self, parent_action=action)
+        child_node = MCTS_node(self.solver, next_state, parent=self, parent_action=action)
     
         self.children.append(child_node)
         return child_node
@@ -105,24 +105,21 @@ class MTCS_node(object):
                 current_node = current_node.best_child()
         return current_node
     
-    def best_action(self):
-        simulation_no = 100
-	
+    def best_action(self, simulation_no = 100):
         for i in range(simulation_no):
-		
             v = self._tree_policy()
             reward = v.rollout()
             v.backpropagate(reward)
 	
         return self.best_child(c_param=0.)
 
-class MTCS_solver(PairingGame.Solver):
+class MCTS_solver(PairingGame.Solver):
     
     def __init__(self, game, step_actions = []):
         self.game = game
         self.step_actions = step_actions
         
-        self.root = MTCS_node(self, self.game.initial_state)
+        self.root = MCTS_node(self, self.game.initial_state)
         
         
 if __name__ == '__main__':
@@ -148,11 +145,11 @@ if __name__ == '__main__':
                      #partial(game.get_all_choose_atacker_action, team = 1),
                      #partial(game.get_all_set_table_for_defender, team = 1),
                      #partial(game.get_all_set_table_for_defender, team = 0),
-                     game.get_all_finalize_game_actions
+                     game.get_all_finalize_game_actions_champ_with_champ
                      ]
     
     
-    solver = MTCS_solver(game, steps_actions)
+    solver = MCTS_solver(game, steps_actions)
     
     best_action = solver.root.best_action()
     print(best_action.state)
