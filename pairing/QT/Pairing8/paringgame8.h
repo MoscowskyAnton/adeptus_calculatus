@@ -13,6 +13,8 @@ class ParingGame8
 public:
     ParingGame8(ScoreSheetTables*, TablesState*);
 
+    //~ParingGame8(ParingGame8 &&) = default;
+
     int get_score();
     void print_results();
 
@@ -41,6 +43,7 @@ public:
     ScoreSheetTables* SS;
     TablesState* TS;
 private:
+
 
 
 };

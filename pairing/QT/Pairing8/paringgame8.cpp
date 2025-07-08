@@ -88,9 +88,9 @@ void ParingGame8::max(int stage, int phase, int alpha, int beta, int *score, int
 
     if(phase == DEFENDER){
         for(int i = 0 ; i < 8; i++){
-            if( stage == FIRST){
-              printf("Calculating defender %i for team A on stage %i\n",i,stage);
-            }
+//            if( stage == FIRST){
+//              printf("Calculating defender %i for team A on stage %i\n",i,stage);
+//            }
             if(teamA.free[i]){
                 teamA.set_defender(stage, i);
                 int new_score, s1, s2;
@@ -103,9 +103,9 @@ void ParingGame8::max(int stage, int phase, int alpha, int beta, int *score, int
                 if(*score >= beta){
                     break;
                 }
-                if(*score > alpha){
-                    alpha = *score;
-                }
+//                if(*score > alpha){
+//                    alpha = *score;
+//                }
             }
         }
     }
@@ -125,9 +125,9 @@ void ParingGame8::max(int stage, int phase, int alpha, int beta, int *score, int
                     if(*score >= beta){
                         break;
                     }
-                    if(*score > alpha){
-                        alpha = *score;
-                    }
+//                    if(*score > alpha){
+//                        alpha = *score;
+//                    }
                 }
             }
         }
@@ -145,9 +145,9 @@ void ParingGame8::max(int stage, int phase, int alpha, int beta, int *score, int
             if(*score >= beta){
                 break;
             }
-            if(*score > alpha){
-                alpha = *score;
-            }
+//            if(*score > alpha){
+//                alpha = *score;
+//            }
         }
     }
     else if(phase == TABLE_CHOOSE){
@@ -171,9 +171,9 @@ void ParingGame8::max(int stage, int phase, int alpha, int beta, int *score, int
                     if(*score >= beta){
                         break;
                     }
-                    if(*score > alpha){
-                        alpha = *score;
-                    }
+//                    if(*score > alpha){
+//                        alpha = *score;
+//                    }
                 }
             }
         }
@@ -192,9 +192,9 @@ void ParingGame8::max(int stage, int phase, int alpha, int beta, int *score, int
                     if(*score >= beta){
                         break;
                     }
-                    if(*score > alpha){
-                        alpha = *score;
-                    }
+//                    if(*score > alpha){
+//                        alpha = *score;
+//                    }
 #ifdef DEBUG_STEPS
                     printf("A END!\n");
 #endif
@@ -215,9 +215,9 @@ void ParingGame8::min(int stage, int phase, int alpha, int beta, int *score, int
 
     if(phase == DEFENDER){
         for(int i = 0 ; i < 8; i++){
-            if( stage == FIRST){
-                printf("\tCalculating defender %i for team B on stage %i\n",i,stage);
-            }
+//            if( stage == FIRST){
+//                printf("\tCalculating defender %i for team B on stage %i\n",i,stage);
+//            }
             if(teamB.free[i]){
                 teamB.set_defender(stage, i);
                 int new_score, s1, s2;
@@ -229,7 +229,7 @@ void ParingGame8::min(int stage, int phase, int alpha, int beta, int *score, int
                 teamB.unset_defender(stage);
                 if(*score <= alpha){
                     break;
-                }
+                }                
                 if(*score < beta){
                     beta = *score;
                 }
@@ -251,7 +251,7 @@ void ParingGame8::min(int stage, int phase, int alpha, int beta, int *score, int
                     teamB.unset_atackers(stage);
                     if(*score <= alpha){
                         break;
-                    }
+                    }                    
                     if(*score < beta){
                         beta = *score;
                     }
@@ -281,7 +281,7 @@ void ParingGame8::min(int stage, int phase, int alpha, int beta, int *score, int
             teamA.unchoose_atacker(stage);
             if(*score <= alpha){
                 break;
-            }
+            }            
             if(*score < beta){
                 beta = *score;
             }
@@ -306,7 +306,7 @@ void ParingGame8::min(int stage, int phase, int alpha, int beta, int *score, int
                     TS->unselectDefenderTable('B', stage);
                     if(*score <= alpha){
                         break;
-                    }
+                    }                    
                     if(*score < beta){
                         beta = *score;
                     }
@@ -328,6 +328,7 @@ void ParingGame8::min(int stage, int phase, int alpha, int beta, int *score, int
                     if(*score <= alpha){
                         break;
                     }
+
                     if(*score < beta){
                         beta = *score;
                     }
@@ -411,7 +412,7 @@ int ParingGame8::input_defender(GameState8* team){
     while(true){
        scanf("%i",&defender);
        if(defender >= SS->players){
-           printf("Player number must be 0-%i",SS->players);
+           printf("Player number must be 0-%i!",SS->players-1);
        }
        else{
            if(team->free[defender]){
@@ -421,6 +422,7 @@ int ParingGame8::input_defender(GameState8* team){
                printf("This player already taken!");
            }
        }
+       printf("\n\tReselect defender: ");
     }
 }
 
@@ -429,7 +431,7 @@ void ParingGame8::input_atakers(GameState8* team, int*a1, int*a2){
     while(true){
         scanf("%i",a1);
         if(*a1 >= SS->players){
-            printf("Player number must be 0-%i",SS->players);
+            printf("Player number must be 0-%i",SS->players-1);
         }
         else{
             if(team->free[*a1]){
@@ -439,12 +441,13 @@ void ParingGame8::input_atakers(GameState8* team, int*a1, int*a2){
                 printf("This player already taken!");
             }
         }
+        printf("\n\tReselect atacker 1: ");
     }
     printf("\n\tSelect atacker 2: ");
     while(true){
         scanf("%i",a2);
         if(*a2 >= SS->players){
-            printf("Player number must be 0-%i",SS->players);
+            printf("Player number must be 0-%i",SS->players-1);
         }
         else{
             if(*a1 != *a2){
@@ -459,13 +462,14 @@ void ParingGame8::input_atakers(GameState8* team, int*a1, int*a2){
                 printf("Can't select the same player, you dumb!");
             }
         }
+        printf("\n\tReselect atacker 2: ");
     }
 }
 
 int ParingGame8::input_choose(GameState8* team, int stage){
     int choose;
     while(true){
-        printf("\n\tChoose atacker from %i (0) and %i (1): ",team->stages[stage].atacker1, team->stages[stage].atacker2);
+        printf("\n\tChoose atacker from %i (type 0) and %i (type 1): ",team->stages[stage].atacker1, team->stages[stage].atacker2);
         scanf("%i",&choose);
         if(choose != 0 && choose != 1){
             printf("Choose must be 0 or 1");
