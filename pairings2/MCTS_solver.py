@@ -45,7 +45,7 @@ class MCTS_node(object):
     #     return self._untried_actions
     
     def expand(self):
-        param = self._untried_params.pop()
+        param = self._untried_params.pop(0)
         
         next_state = self.move(self._action, param)
         
@@ -86,11 +86,13 @@ class MCTS_node(object):
     def is_fully_expanded(self):
         return len(self._untried_params) == 0
     
-    def best_child(self, c_param=0.1):
+    def best_child_no(self, c_param=45):
         
         choices_weights = [np.mean(c._results) + c_param * np.sqrt((2 * np.log(self._number_of_visits)) / c._number_of_visits) for c in self.children]
-        #print(choices_weights)
-        return self.children[np.argmax(choices_weights)]
+        return np.argmax(choices_weights)
+    
+    def best_child(self, c_param=45):
+        return self.children[self.best_child_no(c_param)]
     
     def rollout_policy(self, possible_moves):
         return possible_moves[np.random.randint(len(possible_moves))]

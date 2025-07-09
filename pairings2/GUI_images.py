@@ -5,6 +5,8 @@ from PyQt5.QtWidgets import (
 )
 from PyQt5.QtGui import QPixmap, QTextCursor
 from PyQt5.QtCore import Qt, pyqtSignal, QObject
+import numpy as np
+
 
 class EmittingStream(QObject):
     text_written = pyqtSignal(str)
@@ -15,8 +17,9 @@ class EmittingStream(QObject):
         pass
 
 class StepBlock(QWidget):
-    def __init__(self, step_number, options, extra_text="", on_apply_callback=None):
+    def __init__(self, parent_window, step_number, options, extra_text="", on_apply_callback=None):
         super().__init__()
+        self.parent_window = parent_window
         self.step_number = step_number
         self.original_options = options
         self.extra_text = extra_text
@@ -43,6 +46,31 @@ class StepBlock(QWidget):
         self.dropdown.clear()
         self.dropdown.addItems(self.original_options)
         self.dropdown.setDisabled(False)
+        
+        # game stuff
+        self.game_node = None
+        
+    def update_dropdown_from_node(self):
+        self.dropdown.clear()
+        items = []
+        if not self.game_node is None:
+            if self.game_node.is_fully_expanded():
+                for child in self.game_node.children:
+                    items.append(f"{child.parent_action} {round(np.mean(child._results) ,2)}")
+                self.dropdown.addItems(items)
+                best_no = self.game_node.best_child_no(0.0)
+                item = self.dropdown.model().item(best_no) 
+                if item:
+                    font = item.font()
+                    font.setBold(True)  # Set font to bold
+                    item.setFont(font)
+                self.dropdown.show()
+            else:
+                for param in self.game_node._params:
+                    items.append(str(param))
+                self.dropdown.addItems(items)
+        
+        
 
     def handle_stop_start(self):
         self.is_start = not self.is_start
@@ -53,16 +81,36 @@ class StepBlock(QWidget):
             # "Start" pressed: disable dropdown
             self.dropdown.setDisabled(True)
             print(f"[Step {self.step_number}] Started - dropdown disabled.")
+            
+            self.game_node.best_action(500)
+            print(f"[Step {self.step_number}] finished calculation")
         else:
             # "Stop" pressed: enable dropdown
             self.dropdown.setDisabled(False)
             print(f"[Step {self.step_number}] Stopped - dropdown enabled.")
-
+            
+            # update dropdown
+            self.update_dropdown_from_node()
+            
     def handle_apply(self):
-        selected_value = self.dropdown.currentText()
-        print(f"[Step {self.step_number}] Apply clicked. Selected value: {selected_value}")
+        #selected_value = self.dropdown.currentText()
+        #print(f"[Step {self.step_number}] Apply clicked. Selected value: {selected_value}")
         self.setDisabled(True)
         print(f"[Step {self.step_number}] Block locked after apply.")
+        
+            
+        if len(self.parent_window.blocks) > self.step_number:
+            if self.parent_window.blocks[self.step_number].game_node is None:
+                selected_action_no = self.dropdown.currentIndex()
+                print(selected_action_no)
+                # has children
+                if len(self.game_node.children) < selected_action_no+1:
+                    while not self.game_node.is_fully_expanded():
+                        self.game_node.expand()
+                print(self.game_node.children)
+                self.parent_window.blocks[self.step_number].game_node = self.game_node.children[selected_action_no]
+                self.parent_window.blocks[self.step_number].update_dropdown_from_node()
+                
         if self.on_apply_callback:
             self.on_apply_callback(self.step_number)
 
@@ -102,8 +150,36 @@ class RightBlock(QWidget):
         self.load_image(new_path)
 
 class MainWindow(QMainWindow):
-    def __init__(self, dropdown_options_list, extra_texts_list, right_texts, right_images, right_columns=2):
+    #def __init__(self, dropdown_options_list, extra_texts_list, right_texts, right_images, right_columns=2):
+    def __init__(self, solver, right_columns = 4):
         super().__init__()
+        
+        self.solver = solver
+        
+        n_steps = len(self.solver.step_actions)
+        #print(n_steps)
+        
+        dropdown_options_list = [[] for _ in range(n_steps)]
+        #defs_ids = self.solver.game.get_available_defenders(state = self.solver.root.state, team = 0)
+        
+        extra_texts_list = [""] * n_steps
+        
+        #_, params = self.solver.step_actions[0](self.solver.root.state)
+        #dropdown_options_list[0] = [str(param) for param in params]
+        
+        right_texts = [f"Table {i+1}" for i in range(8)]
+
+        # TODO: load from somewhere
+        right_images = [
+            "C:/Users/79165/YandexDisk/Fest/H&A_F1.png",  
+            "C:/Users/79165/YandexDisk/Fest/CoB_F2.png",
+            "C:/Users/79165/YandexDisk/Fest/S&D_CA1_FEST.png",
+            "C:/Users/79165/YandexDisk/Fest/TP_CA8_FEST.png",
+            "C:/Users/79165/YandexDisk/Fest/H&A_CA7.png",
+            "C:/Users/79165/YandexDisk/Fest/CoB_CA6.png",
+            "C:/Users/79165/YandexDisk/Fest/SA_CA3.png",
+            "C:/Users/79165/YandexDisk/Fest/DoW_CA5.png",
+            ]
 
         self.central_widget = QWidget()
         self.setCentralWidget(self.central_widget)
@@ -129,10 +205,13 @@ class MainWindow(QMainWindow):
 
         self.blocks = []
         for i, (options, extra_text) in enumerate(zip(dropdown_options_list, extra_texts_list), start=1):
-            block = StepBlock(i, options, extra_text=extra_text, on_apply_callback=self.enable_next_block)
+            block = StepBlock(self, i, options, extra_text=extra_text, on_apply_callback=self.enable_next_block)
             self.blocks.append(block)
             step_blocks_layout.addWidget(block)
         step_blocks_layout.addStretch()
+        
+        self.blocks[0].game_node = self.solver.root
+        self.blocks[0].update_dropdown_from_node()
 
         # Scroll area for step blocks
         scroll_area = QScrollArea()
@@ -231,27 +310,27 @@ class MainWindow(QMainWindow):
                 next_block.setDisabled(False)
                 print(f"[MainWindow] Enabled Step #{next_block.step_number}")
 
-if __name__ == '__main__':
-    app = QApplication(sys.argv)
+# if __name__ == '__main__':
+#     app = QApplication(sys.argv)
 
-    # Example with 25 step blocks to test scrolling
-    dropdown_options = [["Option 1", "Option 2", "Option 3"]] * 25
-    extra_texts = [f"(Step {i})" for i in range(1, 26)]
+#     # Example with 25 step blocks to test scrolling
+#     dropdown_options = [["Option 1", "Option 2", "Option 3"]] * 25
+#     extra_texts = [f"(Step {i})" for i in range(1, 26)]
 
-    # Example right side data (3 blocks)
-    right_texts = [
-        "Right block text 1",
-        "Right block text 2",
-        "Right block text 3"
-    ]
+#     # Example right side data (3 blocks)
+#     right_texts = [
+#         "Right block text 1",
+#         "Right block text 2",
+#         "Right block text 3"
+#     ]
 
-    right_images = [
-        "path/to/image1.png",  # Replace with actual image paths
-        "path/to/image2.png",
-        "path/to/image3.png"
-    ]
+#     right_images = [
+#         "path/to/image1.png",  # Replace with actual image paths
+#         "path/to/image2.png",
+#         "path/to/image3.png"
+#     ]
 
-    window = MainWindow(dropdown_options, extra_texts, right_texts, right_images, right_columns=3)
-    window.setWindowTitle("Step Blocks with Scrollable Left, Grid Right, and Console")
-    window.show()
-    sys.exit(app.exec_())
+#     window = MainWindow(dropdown_options, extra_texts, right_texts, right_images, right_columns=3)
+#     window.setWindowTitle("Step Blocks with Scrollable Left, Grid Right, and Console")
+#     window.show()
+#     sys.exit(app.exec_())

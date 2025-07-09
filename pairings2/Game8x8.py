@@ -7,8 +7,8 @@ Created on Tue Jul  8 17:25:05 2025
 import PairingGame
 import MCTS_solver
 from functools import partial
-import GUI
-import GUI_inh
+import GUI_images
+#import GUI_inh
 from PyQt5.QtWidgets import QApplication
 import sys
 
@@ -55,7 +55,7 @@ if __name__ == '__main__':
     app = QApplication(sys.argv)
 
 
-    window = GUI_inh.MainWindow(solver)
+    window = GUI_images.MainWindow(solver)
     window.setWindowTitle("Fest pairing game")
     window.show()
     sys.exit(app.exec_())
