@@ -12,15 +12,19 @@ class MainWindow(GUI_images.MainWindow):
     def __init__(self, solver):
         self.solver = solver
         
-        dropdown_options_list = [[] for _ in range(self.solver.game.N_players)]
-        defs_ids = self.solver.game.get_available_defenders(state = self.solver.root.state, team = 0)
-        dropdown_options_list[0] = [str(id) for id in defs_ids]
+        n_steps = len(self.solver.step_actions)
+        #print(n_steps)
         
-        extra_texts_list = [""] * self.solver.game.N_players
+        dropdown_options_list = [[] for _ in range(n_steps)]
+        #defs_ids = self.solver.game.get_available_defenders(state = self.solver.root.state, team = 0)
         
-        self.solver.step_actions[0]
+        extra_texts_list = [""] * n_steps
         
-        right_texts = [f"Right block text {i}" for i in range(8)]
+        _, params = self.solver.step_actions[0](self.solver.root.state)
+        
+        dropdown_options_list[0] = [str(param) for param in params]
+        
+        right_texts = [f"Table {i+1}" for i in range(8)]
 
 
         right_images = [
@@ -34,4 +38,14 @@ class MainWindow(GUI_images.MainWindow):
             "C:/Users/79165/YandexDisk/Fest/DoW_CA5.png",
             ]
         
-        super().__init__(dropdown_options_list, extra_texts_list, right_texts, right_images)
+        super().__init__(dropdown_options_list, extra_texts_list, right_texts, right_images, on_apply_callback = self.on_apply_callback)
+        
+    
+        
+        
+        
+        
+        
+        
+        
+        

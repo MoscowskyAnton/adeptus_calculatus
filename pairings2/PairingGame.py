@@ -139,10 +139,10 @@ class PairingGame(object):
     def get_available_defenders(self, team, state):
         return state.get_free_players(team)
     
-    def set_defender(self, team, state, player):
-        if state.players_status[team][player] != 'F':
-            raise ValueError(f"Defender {player} is already taken for team {team}, status = {state.players_status[team][player]}")
-        state.players_status[team][player] = 'D'
+    def set_defender(self, team, state, defender):
+        if state.players_status[team][defender] != 'F':
+            raise ValueError(f"Defender {defender} is already taken for team {team}, status = {state.players_status[team][defender]}")
+        state.players_status[team][defender] = 'D'
         #return True
         
     def get_score(self, state):
@@ -159,23 +159,27 @@ class PairingGame(object):
     def get_all_set_defender_actions(self, state, team):
         possible_defenders = self.get_available_defenders(team, state)
         
-        actions = [partial(self.set_defender, state = state, team = team, player = d) for d in possible_defenders]
-        return actions
+        action = partial(self.set_defender, team = team) 
+        params = [{"defender": d} for d in possible_defenders]
+        return action, params
     
     def get_all_set_table_for_defender(self, state, team):
         tables = state.get_free_tables()
-        actions = [partial(self.set_table_for_defender, team = team, table_no = table_no) for table_no in tables]
-        return actions
+        action = partial(self.set_table_for_defender, team = team)
+        params = [{"table_no": table_no} for table_no in tables]
+        return action, params
     
     def get_all_set_attacker_actions(self, state, team):
         atack_pairs = self.get_available_atackers_pairs(team, state)
         
-        actions = [partial(self.set_atackers_pair, state = state, team = team, atackers_pair = pair) for pair in atack_pairs]
-        return actions
+        action = partial(self.set_atackers_pair, team = team)
+        params = [{"atackers_pair": pair} for pair in atack_pairs]
+        return action, params
     
     def get_all_choose_atacker_action(self, state, team):
-        actions = [partial(self.choose_atacker, team = team, choosed = choosed) for choosed in [0, 1]]
-        return actions
+        action = partial(self.choose_atacker, team = team)
+        params = [{"choosed": choosed} for choosed in [0, 1]]
+        return action, params
     
     def get_all_choose_atacker_action_and_return_rej(self, state, team):
         
@@ -183,13 +187,15 @@ class PairingGame(object):
             self.choose_atacker(team, state, choosed)
             self.return_rej_to_deck(team, state)
         
-        actions = [partial(choose_and_return_rej, team = team, choosed = choosed) for choosed in [0, 1]]
+        action = partial(choose_and_return_rej, team = team)
+        params = [{"choosed": choosed} for choosed in [0, 1]]
         
-        return actions
+        return action, params
     
     def get_all_finalize_game_actions_champ_with_champ(self, state):
-        actions = [partial(self.finalize_game_champ_with_champ, table_for_rej = t) for t in [0,1]]
-        return actions
+        action = self.finalize_game_champ_with_champ
+        params = [{"table_for_rej": t} for t in [0,1]]
+        return action, params
     
     
     

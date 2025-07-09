@@ -40,3 +40,4 @@ if __name__ == '__main__':
     
     best_action = solver.root.best_action()
     print(best_action.state)
+    print(best_action.parent_action)

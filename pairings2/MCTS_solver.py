@@ -9,6 +9,7 @@ import PairingGame
 import numpy as np
 #from collections import defaultdict
 from functools import partial
+import copy
 
 class MCTS_node(object):
     def __init__(self, solver, state, parent = None, parent_action = None):
@@ -25,29 +26,30 @@ class MCTS_node(object):
         self._number_of_visits = 0
         
         self._results = []
-        self._untried_actions = None
-        self._untried_actions = self.untried_actions()
+        #self._untried_actions = None
+        self._action, self._params = self.get_legal_actions()
+        self._untried_params = copy.deepcopy(self._params)
         
     def get_legal_actions(self, step = None, state = None):
         if step is None:
             step = self.step
         if state is None:
             state = self.state
-        actions = self.solver.step_actions[step](state = state)
-        if len(actions) == 0:
-            raise ValueError(f"Len of actions is 0, step = {step}, state = {state}")
-        return actions
+        action, params = self.solver.step_actions[step](state = state)
+        if len(params) == 0:
+            raise ValueError(f"Len of action params is 0, step = {step}, state = {state}")
+        return action, params
         
-    def untried_actions(self):
-        self._untried_actions = self.get_legal_actions()
-        return self._untried_actions
+    # def untried_actions(self):
+    #     self._untried_actions = self.get_legal_actions()
+    #     return self._untried_actions
     
     def expand(self):
-        action = self._untried_actions.pop()
+        param = self._untried_params.pop()
         
-        next_state = self.move(action)
+        next_state = self.move(self._action, param)
         
-        child_node = MCTS_node(self.solver, next_state, parent=self, parent_action=action)
+        child_node = MCTS_node(self.solver, next_state, parent=self, parent_action=param)
     
         self.children.append(child_node)
         return child_node
@@ -55,9 +57,9 @@ class MCTS_node(object):
     def is_terminal_node(self):
         return self.step == len(self.solver.step_actions)-1
     
-    def move(self, action):
+    def move(self, action, param):
         next_state = self.state.copy()
-        action(state = next_state)
+        action(state = next_state, **param)
         return next_state
     
     def rollout(self):
@@ -65,12 +67,10 @@ class MCTS_node(object):
         current_rollout_step = self.step
         while not current_rollout_state.is_game_over():
             
-            possible_moves = self.get_legal_actions(step = current_rollout_step, state = current_rollout_state)
+            action, possible_moves = self.get_legal_actions(step = current_rollout_step, state = current_rollout_state)
             
-            action = self.rollout_policy(possible_moves)
-            action(state = current_rollout_state)
-            #current_rollout_state = 
-            #current_rollout_state = current_rollout_state.move(action)
+            move = self.rollout_policy(possible_moves)
+            action(state = current_rollout_state, **move)
             current_rollout_step += 1
         #print(current_rollout_state.formed_pairs)
         score = self.solver.game.get_score(current_rollout_state) 
@@ -84,7 +84,7 @@ class MCTS_node(object):
             self.parent.backpropagate(score)
             
     def is_fully_expanded(self):
-        return len(self._untried_actions) == 0
+        return len(self._untried_params) == 0
     
     def best_child(self, c_param=0.1):
         

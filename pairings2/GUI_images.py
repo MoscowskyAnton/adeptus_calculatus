@@ -1,21 +1,16 @@
-
-    
-    
 import sys
 from PyQt5.QtWidgets import (
     QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QComboBox,
-    QMainWindow, QAction, QFileDialog, QTextEdit, QSizePolicy, QSplitter
+    QMainWindow, QAction, QFileDialog, QTextEdit, QSizePolicy, QSplitter, QGridLayout, QScrollArea
 )
 from PyQt5.QtGui import QPixmap, QTextCursor
 from PyQt5.QtCore import Qt, pyqtSignal, QObject
 
 class EmittingStream(QObject):
     text_written = pyqtSignal(str)
-
     def write(self, text):
         if text.strip():
             self.text_written.emit(str(text))
-
     def flush(self):
         pass
 
@@ -43,31 +38,31 @@ class StepBlock(QWidget):
         self.apply_btn.clicked.connect(self.handle_apply)
 
         self.is_start = True
+
+        # Dropdown enabled and populated on init
         self.dropdown.clear()
-        self.dropdown.setDisabled(True)
+        self.dropdown.addItems(self.original_options)
+        self.dropdown.setDisabled(False)
 
     def handle_stop_start(self):
         self.is_start = not self.is_start
         new_label = "Start" if self.is_start else "Stop"
         self.stop_start_btn.setText(new_label)
 
-        if self.is_start:
-            self.dropdown.clear()
-            self.dropdown.addItems(self.original_options)
-            self.dropdown.setDisabled(False)
-            print(f"[Step {self.step_number}] Started - dropdown populated and enabled.")
-        else:
-            self.dropdown.clear()
+        if not self.is_start:
+            # "Start" pressed: disable dropdown
             self.dropdown.setDisabled(True)
-            print(f"[Step {self.step_number}] Stopped - dropdown cleared and disabled.")
+            print(f"[Step {self.step_number}] Started - dropdown disabled.")
+        else:
+            # "Stop" pressed: enable dropdown
+            self.dropdown.setDisabled(False)
+            print(f"[Step {self.step_number}] Stopped - dropdown enabled.")
 
     def handle_apply(self):
         selected_value = self.dropdown.currentText()
         print(f"[Step {self.step_number}] Apply clicked. Selected value: {selected_value}")
-
         self.setDisabled(True)
         print(f"[Step {self.step_number}] Block locked after apply.")
-
         if self.on_apply_callback:
             self.on_apply_callback(self.step_number)
 
@@ -105,11 +100,9 @@ class RightBlock(QWidget):
     def update_image(self, new_path):
         self.image_path = new_path
         self.load_image(new_path)
-        
-from PyQt5.QtWidgets import QGridLayout
 
 class MainWindow(QMainWindow):
-    def __init__(self, dropdown_options_list, extra_texts_list, right_texts, right_images, right_columns = 4):
+    def __init__(self, dropdown_options_list, extra_texts_list, right_texts, right_images, right_columns=2):
         super().__init__()
 
         self.central_widget = QWidget()
@@ -124,24 +117,37 @@ class MainWindow(QMainWindow):
         # Top horizontal splitter: left and right parts
         self.horizontal_splitter = QSplitter(Qt.Horizontal)
 
-        # Left side widget with StepBlocks
+        # Left side: scroll area with StepBlocks
         left_widget = QWidget()
         left_layout = QVBoxLayout()
         left_widget.setLayout(left_layout)
+
+        # Container widget for step blocks (to put inside scroll area)
+        step_blocks_container = QWidget()
+        step_blocks_layout = QVBoxLayout()
+        step_blocks_container.setLayout(step_blocks_layout)
 
         self.blocks = []
         for i, (options, extra_text) in enumerate(zip(dropdown_options_list, extra_texts_list), start=1):
             block = StepBlock(i, options, extra_text=extra_text, on_apply_callback=self.enable_next_block)
             self.blocks.append(block)
-            left_layout.addWidget(block)
+            step_blocks_layout.addWidget(block)
+        step_blocks_layout.addStretch()
+
+        # Scroll area for step blocks
+        scroll_area = QScrollArea()
+        scroll_area.setWidgetResizable(True)
+        scroll_area.setWidget(step_blocks_container)
+        left_layout.addWidget(scroll_area)
+
+        # Disable all blocks except first
         for block in self.blocks[1:]:
             block.setDisabled(True)
-        left_layout.addStretch()
 
         self.horizontal_splitter.addWidget(left_widget)
         self.horizontal_splitter.setCollapsible(0, False)
 
-        # Right side widget with grid layout for RightBlocks
+        # Right side: grid layout for RightBlocks
         right_widget = QWidget()
         right_layout = QGridLayout()
         right_widget.setLayout(right_layout)
@@ -154,13 +160,12 @@ class MainWindow(QMainWindow):
             col = (m - 1) % right_columns
             right_layout.addWidget(rblock, row, col)
 
-        # Add stretch or spacing if needed, optional:
+        # Add stretch to last row and column for spacing
         right_layout.setRowStretch(row + 1, 1)
         right_layout.setColumnStretch(right_columns, 1)
 
         self.horizontal_splitter.addWidget(right_widget)
         self.horizontal_splitter.setCollapsible(1, False)
-
 
         # Add horizontal splitter to top part of vertical splitter
         self.vertical_splitter.addWidget(self.horizontal_splitter)
@@ -176,7 +181,7 @@ class MainWindow(QMainWindow):
         self.vertical_splitter.setCollapsible(1, False)
 
         # Set initial splitter sizes (top bigger, console smaller)
-        self.vertical_splitter.setSizes([600, 150])
+        self.vertical_splitter.setSizes([700, 150])
         self.horizontal_splitter.setSizes([400, 300])
 
         self.init_menu()
@@ -219,7 +224,7 @@ class MainWindow(QMainWindow):
             # Implement your data loading logic here
 
     def enable_next_block(self, current_step):
-        next_index = current_step
+        next_index = current_step  # zero-based index = current_step - 1, next block = current_step
         if next_index < len(self.blocks):
             next_block = self.blocks[next_index]
             if next_block.isEnabled() is False:
@@ -229,39 +234,24 @@ class MainWindow(QMainWindow):
 if __name__ == '__main__':
     app = QApplication(sys.argv)
 
-    dropdown_options = [
-        ["Apple", "Banana", "Cherry"],
-        ["Red", "Green", "Blue", "Yellow"],
-        ["Cat", "Dog"],
-        ["Python", "C++", "Java", "Rust"],
-        ["Option A", "Option B"]
+    # Example with 25 step blocks to test scrolling
+    dropdown_options = [["Option 1", "Option 2", "Option 3"]] * 25
+    extra_texts = [f"(Step {i})" for i in range(1, 26)]
+
+    # Example right side data (3 blocks)
+    right_texts = [
+        "Right block text 1",
+        "Right block text 2",
+        "Right block text 3"
     ]
-
-    extra_texts = [
-        "(First step)",
-        "(Second step)",
-        "(Third step)",
-        "(Fourth step)",
-        "(Fifth step)"
-    ]
-
-    right_texts = [f"Right block text {i}" for i in range(8)]
-
 
     right_images = [
-        "C:/Users/79165/YandexDisk/Fest/H&A_F1.png",  # Replace with actual image paths
-        "C:/Users/79165/YandexDisk/Fest/CoB_F2.png",
-        "C:/Users/79165/YandexDisk/Fest/S&D_CA1_FEST.png",
-        "C:/Users/79165/YandexDisk/Fest/TP_CA8_FEST.png",
-        "C:/Users/79165/YandexDisk/Fest/H&A_CA7.png",
-        "C:/Users/79165/YandexDisk/Fest/CoB_CA6.png",
-        "C:/Users/79165/YandexDisk/Fest/SA_CA3.png",
-        "C:/Users/79165/YandexDisk/Fest/DoW_CA5.png",
-        
+        "path/to/image1.png",  # Replace with actual image paths
+        "path/to/image2.png",
+        "path/to/image3.png"
     ]
 
-    window = MainWindow(dropdown_options, extra_texts, right_texts, right_images)
-    window.setWindowTitle("Split Interface with Console Below")
+    window = MainWindow(dropdown_options, extra_texts, right_texts, right_images, right_columns=3)
+    window.setWindowTitle("Step Blocks with Scrollable Left, Grid Right, and Console")
     window.show()
     sys.exit(app.exec_())
-
