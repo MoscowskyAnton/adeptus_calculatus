@@ -7,6 +7,9 @@ Created on Tue Jul  8 17:25:05 2025
 import PairingGame
 import MCTS_solver
 from functools import partial
+import GUI_images
+from PyQt5.QtWidgets import QApplication
+import sys
 
 
 if __name__ == '__main__':
@@ -37,7 +40,16 @@ if __name__ == '__main__':
     
     
     solver = MCTS_solver.MCTS_solver(game, steps_actions)
+
     
-    best_action = solver.root.best_action()
-    print(best_action.state)
-    print(best_action.parent_action)
+    app = QApplication(sys.argv)
+
+
+    window = GUI_images.MainWindow(solver)
+    window.setWindowTitle("4x4 test pairing game")
+    window.show()
+    sys.exit(app.exec_())
+    
+    # best_action = solver.root.best_action()
+    # print(best_action.state)
+    # print(best_action.parent_action)

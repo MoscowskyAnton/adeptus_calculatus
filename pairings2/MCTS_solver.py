@@ -27,8 +27,12 @@ class MCTS_node(object):
         
         self._results = []
         #self._untried_actions = None
-        self._action, self._params = self.get_legal_actions()
-        self._untried_params = copy.deepcopy(self._params)
+        if not self.is_terminal_node():
+            self._action, self._params = self.get_legal_actions()
+            self._untried_params = copy.deepcopy(self._params)
+        else:
+            self._action, self._params = None, []
+            self._untried_params = []
         
     def get_legal_actions(self, step = None, state = None):
         if step is None:
@@ -55,7 +59,7 @@ class MCTS_node(object):
         return child_node
         
     def is_terminal_node(self):
-        return self.step == len(self.solver.step_actions)-1
+        return self.step == len(self.solver.step_actions)
     
     def move(self, action, param):
         next_state = self.state.copy()
@@ -87,7 +91,6 @@ class MCTS_node(object):
         return len(self._untried_params) == 0
     
     def best_child_no(self, c_param=45):
-        
         choices_weights = [np.mean(c._results) + c_param * np.sqrt((2 * np.log(self._number_of_visits)) / c._number_of_visits) for c in self.children]
         return np.argmax(choices_weights)
     
