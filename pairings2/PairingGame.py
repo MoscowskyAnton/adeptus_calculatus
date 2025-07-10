@@ -132,11 +132,11 @@ class PairingGame(object):
     table_for_rej - table ID!
     """
     def finalize_game_champ_with_champ(self, state, table_for_rej):
-        rej0 = state.get_status_players(0, 'R')
-        rej1 = state.get_status_players(1, 'R')
+        rej0 = state.get_status_players(0, 'R')[0]
+        rej1 = state.get_status_players(1, 'R')[0]
         
-        champ0 = state.get_status_players(0, 'F')
-        champ1 = state.get_status_players(1, 'F')
+        champ0 = state.get_status_players(0, 'F')[0]
+        champ1 = state.get_status_players(1, 'F')[0]
         
         free_tables = state.get_free_tables()
         if len(free_tables) != 2:

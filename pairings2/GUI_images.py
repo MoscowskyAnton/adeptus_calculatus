@@ -1,12 +1,14 @@
 import sys
 from PyQt5.QtWidgets import (
     QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QComboBox,
-    QMainWindow, QAction, QFileDialog, QTextEdit, QSizePolicy, QSplitter, QGridLayout, QScrollArea
+    QMainWindow, QAction, QFileDialog, QTextEdit, QSizePolicy, QSplitter, QGridLayout, QScrollArea, QLineEdit
 )
 from PyQt5.QtGui import QPixmap, QTextCursor
 from PyQt5.QtCore import Qt, pyqtSignal, QObject
 import numpy as np
 
+import gspread
+from oauth2client.service_account import ServiceAccountCredentials
 
 class EmittingStream(QObject):
     text_written = pyqtSignal(str)
@@ -15,6 +17,121 @@ class EmittingStream(QObject):
             self.text_written.emit(str(text))
     def flush(self):
         pass
+    
+class SheetControlBlock(QWidget):
+    def __init__(self, parent_window):
+        super().__init__()
+        
+        self.parent_window = parent_window
+        self.layout = QHBoxLayout()
+        self.setLayout(self.layout)
+
+        self.label = QLabel("Sheet name")
+        self.text_input = QLineEdit()
+        self.read_btn = QPushButton("Read")
+        self.combo = QComboBox()
+        self.load_btn = QPushButton("Load")
+
+        self.layout.addWidget(self.label)
+        self.layout.addWidget(self.text_input)
+        self.layout.addWidget(self.read_btn)
+        self.layout.addWidget(self.combo)
+        self.layout.addWidget(self.load_btn)
+        
+        self.read_btn.setDisabled(True)
+        self.load_btn.setDisabled(True)
+
+        # Connect buttons
+        self.read_btn.clicked.connect(self.on_read)
+        self.load_btn.clicked.connect(self.on_load)
+        
+        self.spreadsheet = None
+
+    def on_read(self):
+        # Example: fill combo box with dummy sheet names
+        sheet_name = self.text_input.text().strip()
+        if not sheet_name:
+            print("Please enter a sheet name before reading.")
+            return
+        
+        self.spreadsheet = self.parent_window.client.open(sheet_name)
+        # Access the worksheet by its exact sheet name (case-sensitive)
+        worksheets = self.spreadsheet.worksheets()
+        sheet_names = [ws.title for ws in worksheets if ws.title.startswith("Team")]
+        
+        if len(sheet_names):
+            self.combo.clear()
+            self.combo.addItems(sheet_names)
+            self.load_btn.setDisabled(False)
+            print(f"Read from {sheet_name} appropriate sheets: {sheet_names}")
+        else:
+            print(f"No appropriate sheet was readed from {sheet_name} - sheet name must start with \"Team\" word, like Team: PlanB")
+            
+        #print(f"Read sheets for '{sheet_name}': {sheets}")
+
+    def on_load(self):
+        print("Loading...")
+        selected = self.combo.currentText()
+        if self.spreadsheet is None:
+            print("Some error with read sheet")
+        elif selected:
+            
+            self.load_btn.setDisabled(True)
+            print(f"Load button pressed. Selected sheet: {selected}")
+            # Add your load logic here
+            worksheet = self.spreadsheet.worksheet(selected)
+            
+            # READ 8x8 standart Tlen table TODO different table parsers
+            
+            self.parent_window.teams = [[], []]
+            for i in range(8):
+                self.parent_window.teams[0].append(worksheet.acell(f'B{7+i*3}').value)
+            print(f"Read team 0: {self.parent_window.teams[0]}")
+            for i in ['D', 'E', 'F', 'G', 'H', 'I', 'J', 'K']:
+                self.parent_window.teams[1].append(f"{worksheet.acell(f'{i}3').value} - {worksheet.acell(f'{i}4').value}")
+            print(f"Read team 1: {self.parent_window.teams[1]}")
+            
+            scores_raw_data = worksheet.get('D7:K30')
+            
+            full_len = 8
+            def_value = 0
+            ch = []
+            for d in scores_raw_data:
+                dc = [def_value if i == '' else int(i) for i in d]
+                for i in range(len(dc), full_len):
+                    dc.append(def_value)
+                ch.append(dc)
+            
+            self.parent_window.solver.game.scores = np.array(ch).reshape(8, 3, 8).transpose(0, 2, 1)
+            
+            print(f"Read scores") #" {self.parent_window.solver.game.scores}")
+            
+            mapping = worksheet.get('C7:C9')
+            mapping = {v[0]:i for i,v in enumerate(mapping)}
+            
+            raw_tables_data = worksheet.get('D45:K52')
+            def_value = "Middle"
+            tables_str = []
+            for d in raw_tables_data:
+                t = [def_value if not i in mapping else i for i in d]
+                for i in range(len(t), full_len):
+                    t.append(def_value)
+                tables_str.append(t)
+            
+            #print(mapping)
+            tables_int = []
+            for t in tables_str:
+                tables_int.append([mapping[i] for i in t])
+            
+            self.parent_window.solver.game.tables = np.array(tables_int)
+            
+            print(f"Read tables")#" {self.parent_window.solver.game.tables}")
+            
+            self.parent_window.start_solver()
+            self.load_btn.setDisabled(False)
+            
+        else:
+            print("No sheet selected to load.")
 
 class StepBlock(QWidget):
     def __init__(self, parent_window, step_number, options, extra_text="", on_apply_callback=None):
@@ -124,14 +241,20 @@ class StepBlock(QWidget):
         if len(self.parent_window.blocks) > self.step_number:
             if self.parent_window.blocks[self.step_number].game_node is None:
                 selected_action_no = self.dropdown.currentIndex()
-                print(selected_action_no)
                 # has children
                 if len(self.game_node.children) < selected_action_no+1:
                     while not self.game_node.is_fully_expanded():
                         self.game_node.expand()
-                print(self.game_node.children)
+                #print(self.game_node.children)
                 self.parent_window.blocks[self.step_number].game_node = self.game_node.children[selected_action_no]
-                self.parent_window.blocks[self.step_number].update_dropdown_from_node()
+            self.parent_window.blocks[self.step_number].update_dropdown_from_node()
+            
+        elif len(self.parent_window.blocks) == self.step_number:
+            selected_action_no = self.dropdown.currentIndex()
+            if len(self.game_node.children) < selected_action_no+1:
+                while not self.game_node.is_fully_expanded():
+                    self.game_node.expand()
+            self.parent_window.final_game_node = self.game_node.children[selected_action_no]
                 
         if self.on_apply_callback:
             self.on_apply_callback(self.step_number)
@@ -173,7 +296,7 @@ class RightBlock(QWidget):
 
 class MainWindow(QMainWindow):
     #def __init__(self, dropdown_options_list, extra_texts_list, right_texts, right_images, right_columns=2):
-    def __init__(self, solver, teams, right_columns = 4):
+    def __init__(self, solver, teams = [], right_columns = 4):
         super().__init__()
         
         self.solver = solver
@@ -199,9 +322,7 @@ class MainWindow(QMainWindow):
                     text += f"{key} "
             extra_texts_list.append(text)
             action(state = tmp_state, **params[0])
-        
-        #_, params = self.solver.step_actions[0](self.solver.root.state)
-        #dropdown_options_list[0] = [str(param) for param in params]
+    
         
         right_texts = ["______ vs _______" for i in range(8)]
 
@@ -216,15 +337,26 @@ class MainWindow(QMainWindow):
             "C:/Users/79165/YandexDisk/Fest/SA_CA3.png",
             "C:/Users/79165/YandexDisk/Fest/DoW_CA5.png",
             ]
+        
+        self.final_game_node = None
+        
+        # sheet stuff
+        self.creds = None
+        self.client = None
 
         self.central_widget = QWidget()
         self.setCentralWidget(self.central_widget)
 
+        main_layout = QVBoxLayout()
+        self.central_widget.setLayout(main_layout)
+
+        # Add the new SheetControlBlock at the top
+        self.sheet_control = SheetControlBlock(self)
+        main_layout.addWidget(self.sheet_control)
+
         # Main vertical splitter: top (left+right), bottom (console)
         self.vertical_splitter = QSplitter(Qt.Vertical)
-        main_layout = QVBoxLayout()
         main_layout.addWidget(self.vertical_splitter)
-        self.central_widget.setLayout(main_layout)
 
         # Top horizontal splitter: left and right parts
         self.horizontal_splitter = QSplitter(Qt.Horizontal)
@@ -234,7 +366,6 @@ class MainWindow(QMainWindow):
         left_layout = QVBoxLayout()
         left_widget.setLayout(left_layout)
 
-        # Container widget for step blocks (to put inside scroll area)
         step_blocks_container = QWidget()
         step_blocks_layout = QVBoxLayout()
         step_blocks_container.setLayout(step_blocks_layout)
@@ -245,18 +376,13 @@ class MainWindow(QMainWindow):
             self.blocks.append(block)
             step_blocks_layout.addWidget(block)
         step_blocks_layout.addStretch()
-        
-        self.blocks[0].game_node = self.solver.root
-        self.blocks[0].update_dropdown_from_node()
 
-        # Scroll area for step blocks
         scroll_area = QScrollArea()
         scroll_area.setWidgetResizable(True)
         scroll_area.setWidget(step_blocks_container)
         left_layout.addWidget(scroll_area)
 
-        # Disable all blocks except first
-        for block in self.blocks[1:]:
+        for block in self.blocks:
             block.setDisabled(True)
 
         self.horizontal_splitter.addWidget(left_widget)
@@ -275,14 +401,12 @@ class MainWindow(QMainWindow):
             col = (m - 1) % right_columns
             right_layout.addWidget(rblock, row, col)
 
-        # Add stretch to last row and column for spacing
         right_layout.setRowStretch(row + 1, 1)
         right_layout.setColumnStretch(right_columns, 1)
 
         self.horizontal_splitter.addWidget(right_widget)
         self.horizontal_splitter.setCollapsible(1, False)
 
-        # Add horizontal splitter to top part of vertical splitter
         self.vertical_splitter.addWidget(self.horizontal_splitter)
 
         # Console QTextEdit at bottom part of vertical splitter
@@ -295,18 +419,20 @@ class MainWindow(QMainWindow):
         self.vertical_splitter.addWidget(self.console)
         self.vertical_splitter.setCollapsible(1, False)
 
-        # Set initial splitter sizes (top bigger, console smaller)
         self.vertical_splitter.setSizes([700, 150])
         self.horizontal_splitter.setSizes([400, 300])
 
         self.init_menu()
 
-        # Redirect stdout and stderr to console
         sys.stdout = EmittingStream(text_written=self.write_to_console)
         sys.stderr = EmittingStream(text_written=self.write_to_console)
 
-        # Start maximized (full screen)
         self.showMaximized()
+        
+    def start_solver(self):
+        self.blocks[0].game_node = self.solver.root
+        self.blocks[0].update_dropdown_from_node()
+        self.blocks[0].setDisabled(False)
 
     def write_to_console(self, text):
         cursor = self.console.textCursor()
@@ -323,7 +449,7 @@ class MainWindow(QMainWindow):
         menubar = self.menuBar()
         file_menu = menubar.addMenu("File")
 
-        load_action = QAction("Load data...", self)
+        load_action = QAction("Load credentials...", self)
         load_action.triggered.connect(self.load_data)
         file_menu.addAction(load_action)
 
@@ -333,10 +459,18 @@ class MainWindow(QMainWindow):
 
     def load_data(self):
         options = QFileDialog.Options()
-        file_name, _ = QFileDialog.getOpenFileName(self, "Load Data File", "", "All Files (*);;Text Files (*.txt)", options=options)
+        file_name, _ = QFileDialog.getOpenFileName(self, "Load Сredintails File", "", "JSON Files (*.json);", options=options)
         if file_name:
-            print(f"Load data from: {file_name}")
+            print(f"Load credintails from: {file_name}")
             # Implement your data loading logic here
+            scope = [
+                'https://spreadsheets.google.com/feeds',
+                'https://www.googleapis.com/auth/drive'
+                ]
+            
+            self.creds = ServiceAccountCredentials.from_json_keyfile_name(file_name, scope)
+            self.client = gspread.authorize(self.creds)
+            self.sheet_control.read_btn.setDisabled(False)
 
     def enable_next_block(self, current_step):
         next_index = current_step  # zero-based index = current_step - 1, next block = current_step
@@ -349,10 +483,23 @@ class MainWindow(QMainWindow):
         self.update_right_part(current_step)
         
     def update_right_part(self, current_step):
-        state = self.blocks[current_step].game_node.state
+        #print(f"{current_step} \\ {len(self.blocks)}")
+        if current_step == len(self.blocks) and not self.final_game_node is None:
+            state = self.final_game_node.state
+            #print(self.final_game_node.parent_action)
+            #print(state)
+            #print(state.formed_pairs)
+            final_score = self.solver.game.get_score(state)
+            print(f"Pairing game is finished with score {final_score} to team 0")
+        else:
+            state = self.blocks[current_step].game_node.state
         for form_pair in state.formed_pairs:
+            
             p0, p1, t = form_pair
-            self.right_blocks[t].update_text(f"{self.teams[0][p0]} vs {self.teams[1][p1]}")
+            table_type = self.solver.game.tables[p0, t]
+            #print(form_pair, table_type)
+            score = self.solver.game.scores[p0, p1, table_type]
+            self.right_blocks[t].update_text(f"{self.teams[0][p0]} vs {self.teams[1][p1]}: {score}")
             
         
 
