@@ -53,10 +53,32 @@ class StepBlock(QWidget):
     def update_dropdown_from_node(self):
         self.dropdown.clear()
         items = []
+        
+        def parse_param(param):
+            team = None
+            if "team" in param:
+                team = param["team"]
+            other_key = None
+            for key, value in param.items():
+                if "table" in key:
+                    return f"table {value+1}" # because for norm people count is from 0 not 1
+                if key == "team":
+                    pass
+                else:
+                    other_key = key
+            if not other_key is None and not team is None:
+                if "choosed" in other_key:
+                    team = team -1 # DANGER super koslyl
+                if isinstance(param[other_key], int):
+                    return self.parent_window.teams[team][param[other_key]]
+                elif isinstance(param[other_key], tuple):
+                    return self.parent_window.teams[team][param[other_key][0]] + ", " + self.parent_window.teams[team][param[other_key][1]]
+            return str(param)
+        
         if not self.game_node is None:
             if self.game_node.is_fully_expanded():
                 for child in self.game_node.children:
-                    items.append(f"{child.parent_action} {round(np.mean(child._results) ,2)}")
+                    items.append(f"{parse_param(child.parent_action)} {round(np.mean(child._results) ,2)}")
                 self.dropdown.addItems(items)
                 best_no = self.game_node.best_child_no(0.0)
                 item = self.dropdown.model().item(best_no) 
@@ -67,7 +89,7 @@ class StepBlock(QWidget):
                 self.dropdown.show()
             else:
                 for param in self.game_node._params:
-                    items.append(str(param))
+                    items.append(parse_param(param))
                 self.dropdown.addItems(items)
         
         
@@ -122,7 +144,7 @@ class RightBlock(QWidget):
         self.image_path = image_path
 
         self.layout = QVBoxLayout()
-        self.label = QLabel(f"#{block_number} {self.text}")
+        self.label = QLabel(f"T#{block_number} {self.text}")
         self.label.setWordWrap(True)
         self.layout.addWidget(self.label)
 
@@ -143,7 +165,7 @@ class RightBlock(QWidget):
 
     def update_text(self, new_text):
         self.text = new_text
-        self.label.setText(f"#{self.block_number} {self.text}")
+        self.label.setText(f"T#{self.block_number} {self.text}")
 
     def update_image(self, new_path):
         self.image_path = new_path
@@ -151,10 +173,11 @@ class RightBlock(QWidget):
 
 class MainWindow(QMainWindow):
     #def __init__(self, dropdown_options_list, extra_texts_list, right_texts, right_images, right_columns=2):
-    def __init__(self, solver, right_columns = 4):
+    def __init__(self, solver, teams, right_columns = 4):
         super().__init__()
         
         self.solver = solver
+        self.teams = teams
         
         n_steps = len(self.solver.step_actions)
         #print(n_steps)
@@ -162,12 +185,25 @@ class MainWindow(QMainWindow):
         dropdown_options_list = [[] for _ in range(n_steps)]
         #defs_ids = self.solver.game.get_available_defenders(state = self.solver.root.state, team = 0)
         
-        extra_texts_list = [""] * n_steps
+        #extra_texts_list = [""] * n_steps
+        extra_texts_list = []
+        tmp_state = self.solver.root.state.copy()
+        for step in self.solver.step_actions:
+            action, params = step(tmp_state)
+            text = ""
+            #print(params)
+            for key in params[0]:
+                if key == "team":
+                    text += f"T{params[0][key]} "
+                else:
+                    text += f"{key} "
+            extra_texts_list.append(text)
+            action(state = tmp_state, **params[0])
         
         #_, params = self.solver.step_actions[0](self.solver.root.state)
         #dropdown_options_list[0] = [str(param) for param in params]
         
-        right_texts = [f"Table {i+1}" for i in range(8)]
+        right_texts = ["______ vs _______" for i in range(8)]
 
         # TODO: load from somewhere
         right_images = [
@@ -309,6 +345,16 @@ class MainWindow(QMainWindow):
             if next_block.isEnabled() is False:
                 next_block.setDisabled(False)
                 print(f"[MainWindow] Enabled Step #{next_block.step_number}")
+        
+        self.update_right_part(current_step)
+        
+    def update_right_part(self, current_step):
+        state = self.blocks[current_step].game_node.state
+        for form_pair in state.formed_pairs:
+            p0, p1, t = form_pair
+            self.right_blocks[t].update_text(f"{self.teams[0][p0]} vs {self.teams[1][p1]}")
+            
+        
 
 # if __name__ == '__main__':
 #     app = QApplication(sys.argv)

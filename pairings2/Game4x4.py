@@ -44,8 +44,9 @@ if __name__ == '__main__':
     
     app = QApplication(sys.argv)
 
+    teams = ([f"Player{i+1}" for i in range(4)], [f"Player{i+1}" for i in range(4)])
 
-    window = GUI_images.MainWindow(solver)
+    window = GUI_images.MainWindow(solver, teams)
     window.setWindowTitle("4x4 test pairing game")
     window.show()
     sys.exit(app.exec_())

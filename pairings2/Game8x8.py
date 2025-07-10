@@ -54,8 +54,10 @@ if __name__ == '__main__':
     
     app = QApplication(sys.argv)
 
+    teams = (['Nanapod', 'Strohkopf', 'Starrok', 'Fargo', 'Candid', 'Gromorian', 'Enthar', 'Alter_mann'],
+             ['Pain', 'Stepan', 'Ravio', 'Simple', 'Tuzz', 'Sinatel', 'OtherDushnila1', 'OtherDushnila2'])
 
-    window = GUI_images.MainWindow(solver)
+    window = GUI_images.MainWindow(solver, teams, right_columns = 2)
     window.setWindowTitle("Fest pairing game")
     window.show()
     sys.exit(app.exec_())

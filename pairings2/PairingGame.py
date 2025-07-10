@@ -82,15 +82,22 @@ class PairingGame(object):
         
 
     """
-    choosed = 0\1 not player id
+    choosed = player id
     """
-    def choose_atacker(self, team, state, choosed):
-        if choosed not in [0, 1]:
-            raise ValueError(f"choose_atacker must take values 0\1, not {choosed}")
-        atackers = state.get_status_players(team, 'A')
+    def choose_atacker(self, team, state, choosed_atacker):
+        # if choosed_atacker not in [0, 1]:
+            # raise ValueError(f"choose_atacker must take values 0\1, not {choosed_atacker}")
+        #print(state)
+        atackers = state.get_status_players(team-1, 'A') #other team!
         if len(atackers) != 2:
             raise ValueError(f"Atackers count must be 2, not {len(atackers)}")
-        state.players_status[team][atackers[choosed-1]] = 'R' # just mark other as rejected
+        if choosed_atacker not in atackers:
+            raise ValueError(f"No atacker {choosed_atacker} between real atackers {atackers}")
+        
+        atackers.remove(choosed_atacker)
+        rej = atackers[0]
+        
+        state.players_status[team-1][rej] = 'R' # just mark other as rejected
         #return     
         
     def set_table_for_defender(self, team, state, table_no):
@@ -122,7 +129,7 @@ class PairingGame(object):
         state.players_status[team][rej] = 'F'
         
     """
-    table_for_rej = 0\1, where is 0 - first free
+    table_for_rej - table ID!
     """
     def finalize_game_champ_with_champ(self, state, table_for_rej):
         rej0 = state.get_status_players(0, 'R')
@@ -132,9 +139,17 @@ class PairingGame(object):
         champ1 = state.get_status_players(1, 'F')
         
         free_tables = state.get_free_tables()
+        if len(free_tables) != 2:
+            raise ValueError(f"Len of free tables must be 2, not {len(free_tables)}!")
+        if not table_for_rej in free_tables:
+            raise ValueError(f"No table {table_for_rej} between free tables {free_tables}")
         
-        state.formed_pairs.append((rej0, rej1, free_tables[table_for_rej]))
-        state.formed_pairs.append((champ0, champ1, free_tables[table_for_rej-1]))
+        #print(free_tables)
+        free_tables.remove(table_for_rej)
+        champ_table = free_tables[0]
+        #print(champ_table)
+        state.formed_pairs.append((rej0, rej1, table_for_rej))
+        state.formed_pairs.append((champ0, champ1, champ_table))
 
     def get_available_defenders(self, team, state):
         return state.get_free_players(team)
@@ -159,42 +174,51 @@ class PairingGame(object):
     def get_all_set_defender_actions(self, state, team):
         possible_defenders = self.get_available_defenders(team, state)
         
-        action = partial(self.set_defender, team = team) 
-        params = [{"defender": d} for d in possible_defenders]
+        #action = partial(self.set_defender, team = team) 
+        action = self.set_defender
+        params = [{"defender": d, "team": team} for d in possible_defenders]
         return action, params
     
     def get_all_set_table_for_defender(self, state, team):
         tables = state.get_free_tables()
-        action = partial(self.set_table_for_defender, team = team)
-        params = [{"table_no": table_no} for table_no in tables]
+        #action = partial(self.set_table_for_defender, team = team)
+        action = self.set_table_for_defender
+        params = [{"table_no": table_no, "team": team} for table_no in tables]
         return action, params
     
     def get_all_set_attacker_actions(self, state, team):
         atack_pairs = self.get_available_atackers_pairs(team, state)
         
-        action = partial(self.set_atackers_pair, team = team)
-        params = [{"atackers_pair": pair} for pair in atack_pairs]
+        #action = partial(self.set_atackers_pair, team = team)
+        action = self.set_atackers_pair
+        params = [{"atackers_pair": pair, "team": team} for pair in atack_pairs]
         return action, params
     
     def get_all_choose_atacker_action(self, state, team):
-        action = partial(self.choose_atacker, team = team)
-        params = [{"choosed": choosed} for choosed in [0, 1]]
+        #action = partial(self.choose_atacker, team = team)
+        #print(state)
+        atackers = state.get_status_players(team-1, 'A')
+        action = self.choose_atacker
+        params = [{"choosed_atacker": choosed, "team": team} for choosed in atackers]
         return action, params
     
     def get_all_choose_atacker_action_and_return_rej(self, state, team):
         
-        def choose_and_return_rej(state, team, choosed):
-            self.choose_atacker(team, state, choosed)
-            self.return_rej_to_deck(team, state)
+        def choose_and_return_rej(state, team, choosed_atacker):
+            self.choose_atacker(team, state, choosed_atacker)
+            self.return_rej_to_deck(team-1, state)
         
-        action = partial(choose_and_return_rej, team = team)
-        params = [{"choosed": choosed} for choosed in [0, 1]]
+        #action = partial(choose_and_return_rej, team = team)
+        action = choose_and_return_rej
+        atackers = state.get_status_players(team-1, 'A')
+        params = [{"choosed_atacker": choosed, "team": team} for choosed in atackers]
         
         return action, params
     
     def get_all_finalize_game_actions_champ_with_champ(self, state):
         action = self.finalize_game_champ_with_champ
-        params = [{"table_for_rej": t} for t in [0,1]]
+        free_tables = state.get_free_tables()
+        params = [{"table_for_rej": t} for t in free_tables]
         return action, params
     
     
