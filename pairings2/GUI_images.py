@@ -4,11 +4,49 @@ from PyQt5.QtWidgets import (
     QMainWindow, QAction, QFileDialog, QTextEdit, QSizePolicy, QSplitter, QGridLayout, QScrollArea, QLineEdit
 )
 from PyQt5.QtGui import QPixmap, QTextCursor
-from PyQt5.QtCore import Qt, pyqtSignal, QObject
+from PyQt5.QtCore import Qt, pyqtSignal, QObject, QThread
 import numpy as np
 
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
+
+
+class WorkerThread(QThread):
+    # Optional: define a signal to communicate with the GUI if needed
+    update = pyqtSignal(str)
+
+    def __init__(self):
+        super().__init__()
+        #self.solver = solver
+        self._running = False
+        self.node = None
+
+    def run(self):
+        if self.node is None:
+            raise ValueError("Node not inited for worker")
+        self._running = True
+        #self.node = node
+        print("Worker started")
+        cnt = 0
+        while self._running:
+            # Simulate work
+            #print("Working...")
+            #self.update.emit("Working...")  # emit signal if needed
+            #time.sleep(1)
+            v = self.node._tree_policy()
+            reward = v.rollout()
+            v.backpropagate(reward)
+            cnt+=1
+            if cnt % 1000 == 0:
+                print(f"{cnt} simulations passed")
+            
+            
+        print("Worker stopped")
+
+    def stop(self):
+        self._running = False
+
+
 
 class EmittingStream(QObject):
     text_written = pyqtSignal(str)
@@ -221,12 +259,17 @@ class StepBlock(QWidget):
             self.dropdown.setDisabled(True)
             print(f"[Step {self.step_number}] Started - dropdown disabled.")
             
-            self.game_node.best_action(500)
+            #self.game_node.best_action(500)
+            self.parent_window.worker.node = self.game_node
+            self.parent_window.worker.start()
             print(f"[Step {self.step_number}] finished calculation")
         else:
             # "Stop" pressed: enable dropdown
             self.dropdown.setDisabled(False)
             print(f"[Step {self.step_number}] Stopped - dropdown enabled.")
+            
+            self.parent_window.worker.stop()
+            self.parent_window.worker.wait() 
             
             # update dropdown
             self.update_dropdown_from_node()
@@ -428,6 +471,8 @@ class MainWindow(QMainWindow):
         sys.stderr = EmittingStream(text_written=self.write_to_console)
 
         self.showMaximized()
+        
+        self.worker = WorkerThread()
         
     def start_solver(self):
         self.blocks[0].game_node = self.solver.root
