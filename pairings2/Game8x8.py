@@ -46,7 +46,7 @@ if __name__ == '__main__':
                      partial(game.get_all_choose_atacker_action, team = 1),
                      partial(game.get_all_set_table_for_defender, team = 1),
                      partial(game.get_all_set_table_for_defender, team = 0),
-                     game.get_all_finalize_game_actions_champ_with_champ
+                     partial(game.get_all_finalize_game_actions_champ_with_champ, team = 1)
                      ]
     
     

@@ -41,7 +41,7 @@ class WorkerThread(QThread):
                 print(f"{cnt} simulations passed")
             
             
-        print("Worker stopped")
+        print(f"Worker stopped, performed {cnt} simulations")
 
     def stop(self):
         self._running = False
@@ -233,9 +233,10 @@ class StepBlock(QWidget):
         if not self.game_node is None:
             if self.game_node.is_fully_expanded():
                 for child in self.game_node.children:
-                    items.append(f"{parse_param(child.parent_action)} {round(np.mean(child._results) ,2)}")
+                    items.append(f"{parse_param(child.parent_action)} {round(child.value ,2)}")#+{round(np.std(child._results) ,2)}")
                 self.dropdown.addItems(items)
                 best_no = self.game_node.best_child_no(0.0)
+                #best_no = self.game_node.minimax_child_no()
                 item = self.dropdown.model().item(best_no) 
                 if item:
                     font = item.font()
@@ -257,16 +258,16 @@ class StepBlock(QWidget):
         if not self.is_start:
             # "Start" pressed: disable dropdown
             self.dropdown.setDisabled(True)
-            print(f"[Step {self.step_number}] Started - dropdown disabled.")
+            #print(f"[Step {self.step_number}] Started - dropdown disabled.")
             
             #self.game_node.best_action(500)
             self.parent_window.worker.node = self.game_node
             self.parent_window.worker.start()
-            print(f"[Step {self.step_number}] finished calculation")
+            #print(f"[Step {self.step_number}] finished calculation")
         else:
             # "Stop" pressed: enable dropdown
             self.dropdown.setDisabled(False)
-            print(f"[Step {self.step_number}] Stopped - dropdown enabled.")
+            #print(f"[Step {self.step_number}] Stopped - dropdown enabled.")
             
             self.parent_window.worker.stop()
             self.parent_window.worker.wait() 
@@ -278,7 +279,7 @@ class StepBlock(QWidget):
         #selected_value = self.dropdown.currentText()
         #print(f"[Step {self.step_number}] Apply clicked. Selected value: {selected_value}")
         self.setDisabled(True)
-        print(f"[Step {self.step_number}] Block locked after apply.")
+        #print(f"[Step {self.step_number}] Block locked after apply.")
         
             
         if len(self.parent_window.blocks) > self.step_number:
@@ -523,7 +524,7 @@ class MainWindow(QMainWindow):
             next_block = self.blocks[next_index]
             if next_block.isEnabled() is False:
                 next_block.setDisabled(False)
-                print(f"[MainWindow] Enabled Step #{next_block.step_number}")
+                #print(f"[MainWindow] Enabled Step #{next_block.step_number}")
         
         self.update_right_part(current_step)
         

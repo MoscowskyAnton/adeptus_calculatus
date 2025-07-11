@@ -130,8 +130,9 @@ class PairingGame(object):
         
     """
     table_for_rej - table ID!
+    team is for compability
     """
-    def finalize_game_champ_with_champ(self, state, table_for_rej):
+    def finalize_game_champ_with_champ(self, state, table_for_rej, team):
         rej0 = state.get_status_players(0, 'R')[0]
         rej1 = state.get_status_players(1, 'R')[0]
         
@@ -215,10 +216,10 @@ class PairingGame(object):
         
         return action, params
     
-    def get_all_finalize_game_actions_champ_with_champ(self, state):
+    def get_all_finalize_game_actions_champ_with_champ(self, state, team):
         action = self.finalize_game_champ_with_champ
         free_tables = state.get_free_tables()
-        params = [{"table_for_rej": t} for t in free_tables]
+        params = [{"table_for_rej": t, "team": team} for t in free_tables]
         return action, params
     
     
