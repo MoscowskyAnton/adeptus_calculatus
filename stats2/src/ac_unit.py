@@ -8,10 +8,7 @@ from ac_plot import violinplots
 import numpy as np
 import ac_regular
 
-class AC_UNIT(object):
-    
-    
-    
+class AC_UNIT(object):            
     
     def __init__(self, movement, toughness, save, invul, wounds, leadership, oc, weapons = [], *args, **kwargs):
             
@@ -22,19 +19,19 @@ class AC_UNIT(object):
         self.invul = invul
         self.wounds = wounds
         self.leadership = leadership
-        self.oc = oc
-        
-        self.weapons = []
-        self.add_weapons(weapons)
+        self.oc = oc                
                 
         self.args_abilities = args
         self.kwargs_abilities = kwargs
+        
+        self.weapons = []
+        self.add_weapons(weapons)
         
         
     def add_weapons(self, weapons):
         for wep in weapons:
             wc = copy.copy(wep)
-            wc.args_abilities = wc.args_abilities + args
+            wc.args_abilities = wc.args_abilities + self.args_abilities
             self.weapons.append(wc)
     
     
