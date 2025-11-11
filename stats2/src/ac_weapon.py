@@ -22,6 +22,7 @@ class AC_WEAPON(object):
     PLUS_BS = 'PLUS_BS'
     IN_COVER = 'IN_COVER'
     IGNORE_DAMAGE = 'IGNORE_DAMAGE'
+    PLUS_AP = 'PLUS_AP'
     
     '''
     Constructs weapon class
@@ -121,7 +122,10 @@ class AC_WEAPON(object):
         
         for i in range(attacks):
             die = ac_regular.roll_d6()
-            # TODO rr here
+            # rr here
+            if AC_WEAPON.REROLL_TO_HIT in self.args_abilities:
+                if die < value_to_hit:
+                    die = ac_regular.roll_d6()
             
             if( die != 1):
                 

@@ -10,7 +10,7 @@ import numpy as np
 
 if __name__ == '__main__':
     
-    BS = 3
+    BS = 4
     NO_NO_NO_MELTA = 21
     NO_NO_MELTA = 17
     NO_MELTA = 10
@@ -18,7 +18,8 @@ if __name__ == '__main__':
     F_MELTA = 5
     N = 100000
     
-    RANGE = NO_NO_NO_MELTA
+    #RANGE = NO_NO_NO_MELTA
+    RANGE = F_MELTA
     
     # weapons    
     MultiMelta = ac_weapon.AC_WEAPON(18, 2, BS, 9, 4, 'd6', MELTA = 2)
@@ -58,7 +59,24 @@ if __name__ == '__main__':
                                    ], 
                                   ac_weapon.AC_WEAPON.LETHAL_HITS,
                                   #ac_weapon.AC_WEAPON.PLUS_BS
+                                  #ac_weapon.AC_WEAPON.IN_COVER,
+                                  IGNORE_DAMAGE = 1
+                                  )
+    
+    Siege_Dorn = ac_unit.AC_UNIT(10, 12, 2, 0, 18, 7, 5, 
+                                  [OpressorCannon, 
+                                   CoaxialAutoCannon, 
+                                   MultiMelta, 
+                                   MultiMelta, 
+                                   MeltaGun, 
+                                   MeltaGun, 
+                                   HeavyStubber, 
+                                   PulziverCannon
+                                   ], 
+                                  #ac_weapon.AC_WEAPON.LETHAL_HITS,
+                                  #ac_weapon.AC_WEAPON.PLUS_BS
                                   ac_weapon.AC_WEAPON.IN_COVER,
+                                  #ac_weapon.AC_WEAPON.REROLL_TO_HIT,
                                   IGNORE_DAMAGE = 1
                                   )
     
@@ -72,7 +90,7 @@ if __name__ == '__main__':
     
     #cad_data = CAD_Dorn.get_data_damage_target(target, RANGE, N)
     #just_data = Just_Dorn.get_data_damage_target(target, RANGE, N)
-    
+    #CAD
     #cad_mean = np.mean(cad_data)
     #just_mean = np.mean(just_data)
     
@@ -88,36 +106,43 @@ if __name__ == '__main__':
     #####
     # INST
     #####
-    toughnesses = [8, 9, 10, 12, 13]
-    save = 3
-    invul = 4
+    #toughnesses = [8, 9, 10, 12, 13]
     #save = 2
-    #invul = 0
+    #invul = 4
+    ##save = 2
+    ##invul = 0
     
-    CAD_DATAS = []
-    JUST_DATAS = []
+    #CAD_DATAS = []
+    #JUST_DATAS = []    
+    #SIEGE_DATAS = []
     
-    for t in toughnesses:
+    #for t in toughnesses:
         
-        target = ac_unit.AC_UNIT(0, t, save, invul, 0, 0, 0, [])
+        #target = ac_unit.AC_UNIT(0, t, save, invul, 0, 0, 0, [])
         
-        CAD_DATAS.append( CAD_Dorn.get_data_damage_target(target, NO_MELTA, N) )
-        JUST_DATAS.append( Just_Dorn.get_data_damage_target(target, NO_MELTA, N) )
+        #CAD_DATAS.append( CAD_Dorn.get_data_damage_target(target, NO_MELTA, N) )
+        #JUST_DATAS.append( Just_Dorn.get_data_damage_target(target, NO_MELTA, N) )
+        #SIEGE_DATAS.append( Siege_Dorn.get_data_damage_target(target, NO_MELTA, N) )
         
     
-    plot_series([CAD_DATAS, JUST_DATAS], plt.gca(), ['CAD', 'Other'], [f"T{t}" for t in toughnesses], add_cmp_text_on_data = 1)
+    #plot_series([CAD_DATAS, JUST_DATAS, SIEGE_DATAS], plt.gca(), ['CAD', 'Other', 'Siege'], [f"T{t}" for t in toughnesses], add_cmp_text_on_data = 1)
     
-    plt.title(f"RogalDorn on {save}+/{invul}++ and t in {toughnesses}")
-    plt.grid()
+    #plt.title(f"RogalDorn on {save}+/{invul}++ and t in {toughnesses}")
+    #plt.grid()
     
+    ##plt.show()
+    #plt.savefig(f"../rogal_dorn_on_{save}_{invul}_on_t_{toughnesses[0]}-{toughnesses[-1]}.png")
+        
+        
+    # DORN ON DORN
+    
+    SIEGE2CAD = Siege_Dorn.get_data_damage_target(CAD_Dorn, RANGE, N)
+    CAD2SIEGE = CAD_Dorn.get_data_damage_target(Siege_Dorn, RANGE, N)
+    
+    plt.figure("rogal_dorn_on_rogal_on_range_{RANGE}")
+    violinplots( [CAD2SIEGE, SIEGE2CAD], plt.gca(), ['CAD on Siege', 'Siege on CAD'], add_text = True)
+    plt.title(f"RogalDorn on RogalBorn (brotherkiller war) on range = {RANGE}")
     #plt.show()
-    plt.savefig(f"../rogal_dorn_on_{save}_{invul}_on_t_{toughnesses[0]}-{toughnesses[-1]}.png")
-        
-        
-        
-        
-        
-        
-    
+    plt.savefig(f"../rogal_dorn_on_rogal_on_range_{RANGE}.png")
     
     
