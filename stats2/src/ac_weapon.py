@@ -15,6 +15,7 @@ class AC_WEAPON(object):
     MELTA = 'MELTA'
     LETHAL_HITS = 'LETHAL_HITS'
     REROLL_TO_HIT = 'REROLL_TO_HIT'
+    REROLL_TO_WOUND = 'REROLL_TO_WOUND'
     DEVASTATING_WOUNDS = 'DEVASTATING_WOUNDS'
     MOVEMENT_TYPE = 'MOVEMENT_TYPE'
     SUSTANED_HITS = 'SUSTANED_HITS'
@@ -23,6 +24,8 @@ class AC_WEAPON(object):
     IN_COVER = 'IN_COVER'
     IGNORE_DAMAGE = 'IGNORE_DAMAGE'
     PLUS_AP = 'PLUS_AP'
+    # guard
+    FRFSRF = 'FRFSRF'
     
     '''
     Constructs weapon class
@@ -94,10 +97,15 @@ class AC_WEAPON(object):
     def get_attacks(self, range_ = 0):
         if range_ > self.range:
             return 0
+        attacks = 0
         if not AC_WEAPON.RAPID_FIRE in self.kwargs_abilities or range_ > self.range /2 :            
-            return self._attacks()
+            attacks += self._attacks()
         else:
-            return self._attacks()+self.kwargs_abilities[AC_WEAPON.RAPID_FIRE]
+            attacks += self._attacks()+self.kwargs_abilities[AC_WEAPON.RAPID_FIRE]
+        if AC_WEAPON.RAPID_FIRE in self.kwargs_abilities and AC_WEAPON.FRFSRF in self.args_abilities:
+            attacks += 1
+        return attacks
+            
         
     '''
     Gives number of hits
@@ -164,6 +172,15 @@ class AC_WEAPON(object):
         for i in range(hits):
             
             die = ac_regular.roll_d6()
+            # full
+            if AC_WEAPON.REROLL_TO_WOUND in self.args_abilities:
+                if die < to_wound_value:
+                    die = ac_regular.roll_d6()
+                    
+            if AC_WEAPON.REROLL_TO_WOUND in self.kwargs_abilities:
+                if die < to_wound_value and die <= self.kwargs_abilities[AC_WEAPON.REROLL_TO_WOUND]:
+                    die = ac_regular.roll_d6()        
+                    
             # TODO RR
             if die != 1:
                 if die >= self.critical_wound:

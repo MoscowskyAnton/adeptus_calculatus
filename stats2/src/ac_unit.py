@@ -32,6 +32,7 @@ class AC_UNIT(object):
         for wep in weapons:
             wc = copy.copy(wep)
             wc.args_abilities = wc.args_abilities + self.args_abilities
+            wc.kwargs_abilities = {**wc.kwargs_abilities, **self.kwargs_abilities}
             self.weapons.append(wc)
     
     
