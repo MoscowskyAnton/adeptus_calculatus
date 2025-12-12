@@ -4,7 +4,8 @@
 import numpy as np
 from enum import Enum, auto
 import ac_regular
-        
+#from frozendict import frozendict
+
 AC_MOVE = Enum('MOVE', ['NORMAL', 'REMAIN_STATIONARY', 'FOLL_BACK', 'ADVANCE'])
 
 class AC_WEAPON(object):        
@@ -39,8 +40,12 @@ class AC_WEAPON(object):
         *args - abilities without parameters, like TORRENT, ASSAULT, HEAVY etc.
         **kwargs - abilities with paameters, like RAPID_FIRE 1, SUSTANED_HITS 2 etc.
     '''
-    def __init__(self, range_, attacks, skill, strength, ap, damage, *args, **kwargs):
+    def __init__(self, range_, attacks, skill, strength, ap, damage, name="", *args, **kwargs):
         
+        self.args_abilities = args
+        self.kwargs_abilities = kwargs
+        
+        self.name = name
         if isinstance(attacks, int):
             self.attacks = attacks
         elif isinstance(attacks, str):
@@ -55,7 +60,7 @@ class AC_WEAPON(object):
         self.strength = strength
         if not isinstance(ap, int):
             raise TypeError('AC_WEAPON.__init__: ap must be an integer')
-        self.ap = np.abs(ap) # if some one put -2
+        self.ap = np.abs(ap) # if some one put -2        
         
         if isinstance(damage, int):
             self.damage = damage
@@ -71,10 +76,29 @@ class AC_WEAPON(object):
         
         self.critical_hit = 6
         self.critical_wound = 6
+                
         
-        self.args_abilities = args
-        self.kwargs_abilities = kwargs
-        
+    #def __eq__(self, other):
+        #if not isinstance(other, AC_WEAPON):
+            #return NotImplemented
+        ##if self.name == 'Meltagun':# and other.name == 'Meltagun':
+            ##print(self.__dict__)
+            ##print(other.__dict__)
+            ##print('/n')
+        #return self.__dict__ == other.__dict__        
+    
+    #def __hash__(self):
+        #def to_hashable(obj):
+            #if isinstance(obj, dict):
+                #return frozenset((k, to_hashable(v)) for k, v in obj.items())
+            #elif hasattr(obj, '__iter__') and not isinstance(obj, (str, bytes)):
+                #return frozenset(to_hashable(item) for item in obj)
+            #return obj  # primitives are hashable
+    
+        #hashable_items = ((k, to_hashable(v)) for k, v in self.__dict__.items() 
+                      #if not k.startswith('_'))
+        #return hash(frozenset(hashable_items))
+     
             
     def _attacks(self):
         if isinstance(self.attacks, int):
@@ -134,6 +158,10 @@ class AC_WEAPON(object):
             if AC_WEAPON.REROLL_TO_HIT in self.args_abilities:
                 if die < value_to_hit:
                     die = ac_regular.roll_d6()
+                    
+            if AC_WEAPON.REROLL_TO_HIT in self.kwargs_abilities:
+                if die < value_to_hit and die <= self.kwargs_abilities[AC_WEAPON.REROLL_TO_HIT]:
+                    die = ac_regular.roll_d6()        
             
             if( die != 1):
                 
@@ -196,13 +224,17 @@ class AC_WEAPON(object):
     
     def get_damage(self, target, range_ = 0):
         
+        ap = self.ap
+        if AC_WEAPON.PLUS_AP in self.args_abilities:
+            ap += 1
+        
         damage = 0
         saves, no_saves = self.get_wounds(target, range_)
         damages = no_saves
-        save = target.save + self.ap 
+        save = target.save + ap 
         
         if AC_WEAPON.IN_COVER in target.args_abilities:
-            if save != 3 and self.ap != 0:
+            if save != 3 and ap != 0:
                 save = max(2, save-1)
         
         if target.invul != 0:
