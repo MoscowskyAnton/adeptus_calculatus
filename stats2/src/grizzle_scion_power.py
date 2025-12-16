@@ -28,12 +28,26 @@ if __name__ == '__main__':
     
     test_scenarious['RR1+FRFSRF+AP'] = ([ac_weapon.AC_WEAPON.FRFSRF, ac_weapon.AC_WEAPON.PLUS_AP], 
                                         {'SUSTANED_HITS': 1, 'REROLL_TO_WOUND': 1, 'REROLL_TO_HIT': 1})
-    
-    '''
-    test_scenarious['FRFSRF+AP'] = ([ac_weapon.AC_WEAPON.FRFSRF, ac_weapon.AC_WEAPON.PLUS_AP], 
-                                    {'SUSTANED_HITS': 1, 'REROLL_TO_WOUND': 1})
-    '''
+        
     test_scenarious['RR1+T_AIM+AP'] = ([ac_weapon.AC_WEAPON.PLUS_BS, ac_weapon.AC_WEAPON.PLUS_AP], 
+                                       {'SUSTANED_HITS': 1, 'REROLL_TO_WOUND': 1, 'REROLL_TO_HIT': 1})
+    
+    test_scenarious['RR1+FRFSRF+T_AIM+LETHAL'] = ([ac_weapon.AC_WEAPON.FRFSRF, ac_weapon.AC_WEAPON.PLUS_BS, ac_weapon.AC_WEAPON.LETHAL_HITS], 
+                                           {'SUSTANED_HITS': 1, 'REROLL_TO_WOUND': 1, 'REROLL_TO_HIT': 1})
+    
+    test_scenarious['RR1+FRFSRF+AP+LETHAL'] = ([ac_weapon.AC_WEAPON.FRFSRF, ac_weapon.AC_WEAPON.PLUS_AP, ac_weapon.AC_WEAPON.PLUS_BS, ac_weapon.AC_WEAPON.LETHAL_HITS], 
+                                        {'SUSTANED_HITS': 1, 'REROLL_TO_WOUND': 1, 'REROLL_TO_HIT': 1})
+        
+    test_scenarious['RR1+T_AIM+AP+LETHAL'] = ([ac_weapon.AC_WEAPON.PLUS_BS, ac_weapon.AC_WEAPON.PLUS_AP, ac_weapon.AC_WEAPON.PLUS_BS, ac_weapon.AC_WEAPON.LETHAL_HITS], 
+                                       {'SUSTANED_HITS': 1, 'REROLL_TO_WOUND': 1, 'REROLL_TO_HIT': 1})
+                                       
+    test_scenarious['RR1+FRFSRF+T_AIM+STR'] = ([ac_weapon.AC_WEAPON.FRFSRF, ac_weapon.AC_WEAPON.PLUS_BS, ac_weapon.AC_WEAPON.PLUS_STR], 
+                                           {'SUSTANED_HITS': 1, 'REROLL_TO_WOUND': 1, 'REROLL_TO_HIT': 1})
+    
+    test_scenarious['RR1+FRFSRF+AP+STR'] = ([ac_weapon.AC_WEAPON.FRFSRF, ac_weapon.AC_WEAPON.PLUS_AP, ac_weapon.AC_WEAPON.PLUS_BS, ac_weapon.AC_WEAPON.PLUS_STR], 
+                                        {'SUSTANED_HITS': 1, 'REROLL_TO_WOUND': 1, 'REROLL_TO_HIT': 1})
+        
+    test_scenarious['RR1+T_AIM+AP+STR'] = ([ac_weapon.AC_WEAPON.PLUS_BS, ac_weapon.AC_WEAPON.PLUS_AP, ac_weapon.AC_WEAPON.PLUS_BS, ac_weapon.AC_WEAPON.PLUS_STR], 
                                        {'SUSTANED_HITS': 1, 'REROLL_TO_WOUND': 1, 'REROLL_TO_HIT': 1})
     
     LABELS = []
@@ -73,6 +87,7 @@ if __name__ == '__main__':
                             (Grenadier, 1),
                             (PlasmaGunner, 3),
                             (Volley, 3),
+                            #(MeltaGunner, 3),
                             (Lasgunner, 4),
                             (Medic, 1)
                             ])
@@ -87,7 +102,7 @@ if __name__ == '__main__':
                    ac_unit.AC_UNIT(6, 11, 2, 4, 11, 6, 3, [], ac_weapon.AC_WEAPON.IN_COVER)
                    ]
         
-        N = 100000
+        N = 10000
         
         d = []
         for target in targets:
@@ -98,7 +113,7 @@ if __name__ == '__main__':
     
     plot_series( DATA, plt.gca(), LABELS,  ['on SM', 'on SM cover', 'on plague cover', 'on termi', 'on termi cover', 'tank t10 3+', 'tank t11 2+', 'tank t11 2+ 4++'], between = False)
     plt.grid()
-    plt.xlabel("Models killed")
-    plt.title("Scion-bombs on different targets (volly+gren)")
+    plt.ylabel("Models killed")
+    plt.title("Scion-bombs on different targets (volley+gren) everything!")
     plt.show()
     

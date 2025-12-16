@@ -27,6 +27,7 @@ class AC_WEAPON(object):
     PLUS_AP = 'PLUS_AP'
     # guard
     FRFSRF = 'FRFSRF'
+    PLUS_STR = 'PLUS_STR'
     
     '''
     Constructs weapon class
@@ -184,13 +185,17 @@ class AC_WEAPON(object):
         
         saves, no_saves = wounds, 0
         
-        if self.strength *2 <= target.toughness:
+        strength = self.strength
+        if AC_WEAPON.PLUS_STR in self.args_abilities:
+            strength += 1
+        
+        if strength *2 <= target.toughness:
             to_wound_value = 6
-        elif self.strength < target.toughness:
+        elif strength < target.toughness:
             to_wound_value = 5
-        elif self.strength == target.toughness:
+        elif strength == target.toughness:
             to_wound_value = 4
-        elif self.strength >= target.toughness * 2:
+        elif strength >= target.toughness * 2:
             to_wound_value = 2
         else:
             to_wound_value = 3
