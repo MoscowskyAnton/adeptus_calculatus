@@ -35,7 +35,7 @@ class AC_SQUAD(object):
         for unit in self.units:
             for weapon in unit.weapons:
                 if weapon.name == "":
-                    print("Warn! Empty weapon name may rion process!")
+                    print("Warn! Empty weapon name may ruin the process!")
                 if weapon.name in self.weapon_list:
                     self.weapon_list[weapon.name][1] += 1
                 else:

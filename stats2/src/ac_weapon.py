@@ -238,7 +238,7 @@ class AC_WEAPON(object):
         damages = no_saves
         save = target.save + ap 
         
-        if AC_WEAPON.IN_COVER in target.args_abilities:
+        if AC_WEAPON.IN_COVER in target.args_abilities and not (AC_WEAPON.IGNORES_COVER in self.args_abilities):
             if save != 3 and ap != 0:
                 save = max(2, save-1)
         

@@ -11,10 +11,10 @@ import matplotlib.pyplot as plt
 
 if __name__ == '__main__':
     
-    melta = False
+    melta = True
     
     vep = "melta" if melta else "volley"
-    title = f"Scion-bombs on different targets ({vep}+gren) +str vs lethal (full rr2w)"
+    title = f"Scion-bombs on different targets ({vep}+gren) lethals"
     
     test_scenarious = {}
     
@@ -38,23 +38,23 @@ if __name__ == '__main__':
     
     # full RR to wound
     
-    #test_scenarious['RR1+FRFSRF+T_AIM'] = ([ac_weapon.AC_WEAPON.FRFSRF, ac_weapon.AC_WEAPON.PLUS_BS, ac_weapon.AC_WEAPON.REROLL_TO_WOUND], 
-                                           #{'SUSTANED_HITS': 1, 'REROLL_TO_HIT': 1})
+    test_scenarious['RR1+FRFSRF+T_AIM'] = ([ac_weapon.AC_WEAPON.FRFSRF, ac_weapon.AC_WEAPON.PLUS_BS, ac_weapon.AC_WEAPON.REROLL_TO_WOUND], 
+                                           {'SUSTANED_HITS': 1, 'REROLL_TO_HIT': 1})
     
-    #test_scenarious['RR1+FRFSRF+AP'] = ([ac_weapon.AC_WEAPON.FRFSRF, ac_weapon.AC_WEAPON.PLUS_AP, ac_weapon.AC_WEAPON.REROLL_TO_WOUND], 
-                                        #{'SUSTANED_HITS': 1, 'REROLL_TO_HIT': 1})
+    test_scenarious['RR1+FRFSRF+AP'] = ([ac_weapon.AC_WEAPON.FRFSRF, ac_weapon.AC_WEAPON.PLUS_AP, ac_weapon.AC_WEAPON.REROLL_TO_WOUND], 
+                                        {'SUSTANED_HITS': 1, 'REROLL_TO_HIT': 1})
         
-    #test_scenarious['RR1+T_AIM+AP'] = ([ac_weapon.AC_WEAPON.PLUS_BS, ac_weapon.AC_WEAPON.PLUS_AP, ac_weapon.AC_WEAPON.REROLL_TO_WOUND], 
-                                       #{'SUSTANED_HITS': 1, 'REROLL_TO_HIT': 1})
+    test_scenarious['RR1+T_AIM+AP'] = ([ac_weapon.AC_WEAPON.PLUS_BS, ac_weapon.AC_WEAPON.PLUS_AP, ac_weapon.AC_WEAPON.REROLL_TO_WOUND], 
+                                       {'SUSTANED_HITS': 1, 'REROLL_TO_HIT': 1})
     
-    #test_scenarious['RR1+FRFSRF+T_AIM+LETHAL'] = ([ac_weapon.AC_WEAPON.FRFSRF, ac_weapon.AC_WEAPON.PLUS_BS, ac_weapon.AC_WEAPON.LETHAL_HITS, ac_weapon.AC_WEAPON.REROLL_TO_WOUND], 
-                                           #{'SUSTANED_HITS': 1, 'REROLL_TO_HIT': 1})
+    test_scenarious['RR1+FRFSRF+T_AIM+LETHAL'] = ([ac_weapon.AC_WEAPON.FRFSRF, ac_weapon.AC_WEAPON.PLUS_BS, ac_weapon.AC_WEAPON.LETHAL_HITS, ac_weapon.AC_WEAPON.REROLL_TO_WOUND], 
+                                           {'SUSTANED_HITS': 1, 'REROLL_TO_HIT': 1})
     
-    #test_scenarious['RR1+FRFSRF+AP+LETHAL'] = ([ac_weapon.AC_WEAPON.FRFSRF, ac_weapon.AC_WEAPON.PLUS_AP, ac_weapon.AC_WEAPON.PLUS_BS, ac_weapon.AC_WEAPON.LETHAL_HITS, ac_weapon.AC_WEAPON.REROLL_TO_WOUND], 
-                                        #{'SUSTANED_HITS': 1, 'REROLL_TO_HIT': 1})
+    test_scenarious['RR1+FRFSRF+AP+LETHAL'] = ([ac_weapon.AC_WEAPON.FRFSRF, ac_weapon.AC_WEAPON.PLUS_AP, ac_weapon.AC_WEAPON.LETHAL_HITS, ac_weapon.AC_WEAPON.REROLL_TO_WOUND], 
+                                        {'SUSTANED_HITS': 1, 'REROLL_TO_HIT': 1})
         
-    #test_scenarious['RR1+T_AIM+AP+LETHAL'] = ([ac_weapon.AC_WEAPON.PLUS_BS, ac_weapon.AC_WEAPON.PLUS_AP, ac_weapon.AC_WEAPON.PLUS_BS, ac_weapon.AC_WEAPON.LETHAL_HITS, ac_weapon.AC_WEAPON.REROLL_TO_WOUND], 
-                                       #{'SUSTANED_HITS': 1, 'REROLL_TO_HIT': 1})
+    test_scenarious['RR1+T_AIM+AP+LETHAL'] = ([ac_weapon.AC_WEAPON.PLUS_BS, ac_weapon.AC_WEAPON.PLUS_AP, ac_weapon.AC_WEAPON.PLUS_BS, ac_weapon.AC_WEAPON.LETHAL_HITS, ac_weapon.AC_WEAPON.REROLL_TO_WOUND], 
+                                       {'SUSTANED_HITS': 1, 'REROLL_TO_HIT': 1})
     
     
     # STR
@@ -62,30 +62,36 @@ if __name__ == '__main__':
     #test_scenarious['RR1+FRFSRF+T_AIM+STR'] = ([ac_weapon.AC_WEAPON.FRFSRF, ac_weapon.AC_WEAPON.PLUS_BS, ac_weapon.AC_WEAPON.PLUS_STR], 
                                            #{'SUSTANED_HITS': 1, 'REROLL_TO_WOUND': 1, 'REROLL_TO_HIT': 1})
     
-    #test_scenarious['RR1+FRFSRF+AP+STR'] = ([ac_weapon.AC_WEAPON.FRFSRF, ac_weapon.AC_WEAPON.PLUS_AP, ac_weapon.AC_WEAPON.PLUS_BS, ac_weapon.AC_WEAPON.PLUS_STR], 
+    #test_scenarious['RR1+FRFSRF+AP+STR'] = ([ac_weapon.AC_WEAPON.FRFSRF, ac_weapon.AC_WEAPON.PLUS_AP, ac_weapon.AC_WEAPON.PLUS_STR], 
                                         #{'SUSTANED_HITS': 1, 'REROLL_TO_WOUND': 1, 'REROLL_TO_HIT': 1})
     
     
     # STR vs LETHAL
     
-    test_scenarious['RR1+FRFSRF+T_AIM'] = ([ac_weapon.AC_WEAPON.FRFSRF, ac_weapon.AC_WEAPON.PLUS_BS, ac_weapon.AC_WEAPON.REROLL_TO_WOUND], 
-                                           {'SUSTANED_HITS': 1, 'REROLL_TO_HIT': 1})
+    #test_scenarious['RR1+FRFSRF+T_AIM'] = ([ac_weapon.AC_WEAPON.FRFSRF, ac_weapon.AC_WEAPON.PLUS_BS, ac_weapon.AC_WEAPON.REROLL_TO_WOUND], 
+                                           #{'SUSTANED_HITS': 1, 'REROLL_TO_HIT': 1})
 
-    test_scenarious['RR1+FRFSRF+T_AIM+LETHAL'] = ([ac_weapon.AC_WEAPON.FRFSRF, ac_weapon.AC_WEAPON.PLUS_BS, ac_weapon.AC_WEAPON.REROLL_TO_WOUND, ac_weapon.AC_WEAPON.LETHAL_HITS], 
-                                           {'SUSTANED_HITS': 1, 'REROLL_TO_HIT': 1})
+    #test_scenarious['RR1+FRFSRF+T_AIM+LETHAL'] = ([ac_weapon.AC_WEAPON.FRFSRF, ac_weapon.AC_WEAPON.PLUS_BS, ac_weapon.AC_WEAPON.REROLL_TO_WOUND, ac_weapon.AC_WEAPON.LETHAL_HITS], 
+                                           #{'SUSTANED_HITS': 1, 'REROLL_TO_HIT': 1})
     
-    test_scenarious['RR1+FRFSRF+AP+LETHAL'] = ([ac_weapon.AC_WEAPON.FRFSRF, ac_weapon.AC_WEAPON.PLUS_AP, ac_weapon.AC_WEAPON.PLUS_BS, ac_weapon.AC_WEAPON.LETHAL_HITS, ac_weapon.AC_WEAPON.REROLL_TO_WOUND], 
-                                        {'SUSTANED_HITS': 1, 'REROLL_TO_HIT': 1})
+    #test_scenarious['RR1+FRFSRF+AP+LETHAL'] = ([ac_weapon.AC_WEAPON.FRFSRF, ac_weapon.AC_WEAPON.PLUS_AP, ac_weapon.AC_WEAPON.LETHAL_HITS, ac_weapon.AC_WEAPON.REROLL_TO_WOUND], 
+                                        #{'SUSTANED_HITS': 1, 'REROLL_TO_HIT': 1})
         
-    test_scenarious['RR1+T_AIM+AP+LETHAL'] = ([ac_weapon.AC_WEAPON.PLUS_BS, ac_weapon.AC_WEAPON.PLUS_AP, ac_weapon.AC_WEAPON.PLUS_BS, ac_weapon.AC_WEAPON.LETHAL_HITS, ac_weapon.AC_WEAPON.REROLL_TO_WOUND], 
-                                       {'SUSTANED_HITS': 1, 'REROLL_TO_HIT': 1})
+    #test_scenarious['RR1+T_AIM+AP+LETHAL'] = ([ac_weapon.AC_WEAPON.PLUS_BS, ac_weapon.AC_WEAPON.PLUS_AP, ac_weapon.AC_WEAPON.PLUS_BS, ac_weapon.AC_WEAPON.LETHAL_HITS, ac_weapon.AC_WEAPON.REROLL_TO_WOUND], 
+                                       #{'SUSTANED_HITS': 1, 'REROLL_TO_HIT': 1})
                                        
-    test_scenarious['RR1+FRFSRF+T_AIM+STR'] = ([ac_weapon.AC_WEAPON.FRFSRF, ac_weapon.AC_WEAPON.PLUS_BS, ac_weapon.AC_WEAPON.PLUS_STR, ac_weapon.AC_WEAPON.REROLL_TO_WOUND], 
-                                           {'SUSTANED_HITS': 1, 'REROLL_TO_HIT': 1})
+    #test_scenarious['RR1+FRFSRF+T_AIM+STR'] = ([ac_weapon.AC_WEAPON.FRFSRF, ac_weapon.AC_WEAPON.PLUS_BS, ac_weapon.AC_WEAPON.PLUS_STR, ac_weapon.AC_WEAPON.REROLL_TO_WOUND], 
+                                           #{'SUSTANED_HITS': 1, 'REROLL_TO_HIT': 1})
     
-    test_scenarious['RR1+FRFSRF+AP+STR'] = ([ac_weapon.AC_WEAPON.FRFSRF, ac_weapon.AC_WEAPON.PLUS_AP, ac_weapon.AC_WEAPON.PLUS_BS, ac_weapon.AC_WEAPON.PLUS_STR, ac_weapon.AC_WEAPON.REROLL_TO_WOUND], 
-                                        {'SUSTANED_HITS': 1, 'REROLL_TO_HIT': 1})
+    #test_scenarious['RR1+FRFSRF+AP+STR'] = ([ac_weapon.AC_WEAPON.FRFSRF, ac_weapon.AC_WEAPON.PLUS_AP, ac_weapon.AC_WEAPON.PLUS_STR, ac_weapon.AC_WEAPON.REROLL_TO_WOUND], 
+                                        #{'SUSTANED_HITS': 1, 'REROLL_TO_HIT': 1})
             
+    #test_scenarious['RR1+FRFSRF+T_AIM+STR+LETHAL'] = ([ac_weapon.AC_WEAPON.FRFSRF, ac_weapon.AC_WEAPON.PLUS_BS, ac_weapon.AC_WEAPON.PLUS_STR, ac_weapon.AC_WEAPON.REROLL_TO_WOUND, ac_weapon.AC_WEAPON.LETHAL_HITS], 
+                                           #{'SUSTANED_HITS': 1, 'REROLL_TO_HIT': 1})
+    
+    #test_scenarious['RR1+FRFSRF+AP+STR+LETHAL'] = ([ac_weapon.AC_WEAPON.FRFSRF, ac_weapon.AC_WEAPON.PLUS_AP, ac_weapon.AC_WEAPON.PLUS_STR, ac_weapon.AC_WEAPON.REROLL_TO_WOUND, ac_weapon.AC_WEAPON.LETHAL_HITS], 
+                                        #{'SUSTANED_HITS': 1, 'REROLL_TO_HIT': 1})
+    
     
     LABELS = []
     DATA = []
