@@ -210,7 +210,7 @@ class AC_WEAPON(object):
                 if die < to_wound_value:
                     die = ac_regular.roll_d6()
                     
-            if AC_WEAPON.REROLL_TO_WOUND in self.kwargs_abilities:
+            elif AC_WEAPON.REROLL_TO_WOUND in self.kwargs_abilities:
                 if die < to_wound_value and die <= self.kwargs_abilities[AC_WEAPON.REROLL_TO_WOUND]:
                     die = ac_regular.roll_d6()        
                     
