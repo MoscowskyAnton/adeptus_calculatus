@@ -41,7 +41,7 @@ class AC_WEAPON(object):
         *args - abilities without parameters, like TORRENT, ASSAULT, HEAVY etc.
         **kwargs - abilities with paameters, like RAPID_FIRE 1, SUSTANED_HITS 2 etc.
     '''
-    def __init__(self, range_, attacks, skill, strength, ap, damage, name="", *args, **kwargs):
+    def __init__(self, range_, attacks, skill, strength, ap, damage, name, *args, **kwargs):
         
         self.args_abilities = args
         self.kwargs_abilities = kwargs
@@ -77,6 +77,7 @@ class AC_WEAPON(object):
         
         self.critical_hit = 6
         self.critical_wound = 6
+        #print(args)
                 
         
     #def __eq__(self, other):
@@ -123,10 +124,10 @@ class AC_WEAPON(object):
         if range_ > self.range:
             return 0
         attacks = 0
-        if not AC_WEAPON.RAPID_FIRE in self.kwargs_abilities or range_ > self.range /2 :            
-            attacks += self._attacks()
+        if AC_WEAPON.RAPID_FIRE in self.kwargs_abilities and range_ <= self.range /2 :            
+            attacks += self._attacks()+self.kwargs_abilities[AC_WEAPON.RAPID_FIRE]            
         else:
-            attacks += self._attacks()+self.kwargs_abilities[AC_WEAPON.RAPID_FIRE]
+            attacks += self._attacks()
         if AC_WEAPON.RAPID_FIRE in self.kwargs_abilities and AC_WEAPON.FRFSRF in self.args_abilities:
             attacks += 1
         return attacks
@@ -260,14 +261,58 @@ class AC_WEAPON(object):
         
         return damage
         
+        
+    def get_damage_models(self, target, range_ = 0):
+        
+        ap = self.ap
+        if AC_WEAPON.PLUS_AP in self.args_abilities:
+            ap += 1
+        
+        
+        saves, no_saves = self.get_wounds(target, range_)        
+        save = target.save + ap 
+        
+        unsuccessfull_saves = 0
+        
+        if AC_WEAPON.IN_COVER in target.args_abilities and not (AC_WEAPON.IGNORES_COVER in self.args_abilities):
+            if not (target.save == 3 and ap == 0):
+                save = max(2, save-1)
+        
+        if target.invul != 0:
+            save = min(save, target.invul)
+        
+        for i in range(saves):
+            die = ac_regular.roll_d6()
+            
+            if die == 1 or die < save:
+                unsuccessfull_saves += 1
+        
+        models_killed = 0
+        damage = 0
+        for i in range(unsuccessfull_saves + no_saves):   
+            damage += self._damage()
+            if AC_WEAPON.MELTA in self.kwargs_abilities and range_ <= self.range/2:
+                damage += self.kwargs_abilities[AC_WEAPON.MELTA]
+            if damage >= target.wounds:
+                models_killed += 1
+                damage = 0
+        
+        models_killed += damage / target.wounds
+        
+        #TODO FNP
+        
+        return models_killed
             
 if __name__ == '__main__' :
     
-    lasgun = AC_WEAPON(24, 1, 4, 3, 0, 1, RAPID_FIRE = 1)
-    #print(lasgun.get_attacks(6))
-    print(lasgun.get_hits())
+    args = [AC_WEAPON.FRFSRF]
+    print(args)
+    lasgun = AC_WEAPON(24, 1, 4, 3, 0, 1, "lasgun", *args, RAPID_FIRE = 1)        
+    
+    print(lasgun.get_attacks(9.1))
+    #print(lasgun.get_hits())
     
     
-    flamer = AC_WEAPON(12, 'd6', 0, 4, 0, 1, AC_WEAPON.TORRENT)
-    #print(flamer.get_attacks(1))
-    print(flamer.get_hits())
+    #flamer = AC_WEAPON(12, 'd6', 0, 4, 0, 1, AC_WEAPON.TORRENT)
+    ##print(flamer.get_attacks(1))
+    #print(flamer.get_hits())
