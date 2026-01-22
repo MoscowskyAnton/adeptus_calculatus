@@ -11,7 +11,8 @@ import ac_regular
 class AC_UNIT(object):            
     
     def __init__(self, movement, toughness, save, invul, wounds, leadership, oc, weapons = [], *args, **kwargs):
-            
+                
+        
         # TODO: check values
         self.movement = movement
         self.toughness = toughness
@@ -32,7 +33,9 @@ class AC_UNIT(object):
         for wep in weapons:
             wc = copy.copy(wep)
             wc.args_abilities = wc.args_abilities + self.args_abilities
+            wc.kwargs_abilities = {**wc.kwargs_abilities, **self.kwargs_abilities}
             self.weapons.append(wc)
+            #print(wc.args_abilities)
     
     
     def attack_target(self, target, range_):

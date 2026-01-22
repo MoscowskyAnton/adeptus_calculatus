@@ -8,6 +8,7 @@ Created on Fri Jul 11 15:01:01 2025
 import random
 from collections import defaultdict
 from itertools import product
+import numpy as np
 
 class PairingGameState:
     def __init__(self, team1_pool, team2_pool, assigned_pairs, tables_assigned,

@@ -24,7 +24,7 @@ def violinplots(data, ax, labels, rotation = 0, add_text = False):
     ax.grid()
 
 
-def plot_series(list_of_data_of_data, ax, labels, ticks, rotation = 0, add_cmp_text_on_data = -1):
+def plot_series(list_of_data_of_data, ax, labels, ticks, rotation = 0, add_cmp_text_on_data = -1, between = True):
     
     if add_cmp_text_on_data != -1:
         MEANS = []
@@ -43,7 +43,8 @@ def plot_series(list_of_data_of_data, ax, labels, ticks, rotation = 0, add_cmp_t
         stds = np.array(stds)
         
         plt.plot(range(len(data_of_data)), means ,marker='o', linestyle='-', label = label)
-        plt.fill_between(range(len(data_of_data)), means - stds, means + stds, alpha = 0.3)
+        if between:
+            plt.fill_between(range(len(data_of_data)), means - stds, means + stds, alpha = max(0.1, 1./len(list_of_data_of_data)))
         
     if add_cmp_text_on_data != -1:
         for i, means in enumerate(MEANS):
